@@ -130,6 +130,8 @@
     <color name="difficulty_medium">#FF9800</color>
     <color name="difficulty_hard">#F44336</color>
     <color name="difficulty_expert">#9C27B0</color>
+
+    <color name="game_error">#F44336</color>
 </resources>
 
 
