@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material Design 3 Color Scheme - Space/Gaming Theme -->
+
+    <!-- Primary colors -->
+    <color name="md_theme_primary">#00BCD4</color>
+    <color name="md_theme_on_primary">#FFFFFF</color>
+    <color name="md_theme_primary_container">#004D56</color>
+    <color name="md_theme_on_primary_container">#A8F0FF</color>
+
+    <!-- Secondary colors -->
+    <color name="md_theme_secondary">#9C27B0</color>
+    <color name="md_theme_on_secondary">#FFFFFF</color>
+    <color name="md_theme_secondary_container">#4A1456</color>
+    <color name="md_theme_on_secondary_container">#E1BEE7</color>
+
+    <!-- Tertiary colors -->
+    <color name="md_theme_tertiary">#FF9800</color>
+    <color name="md_theme_on_tertiary">#FFFFFF</color>
+    <color name="md_theme_tertiary_container">#663D00</color>
+    <color name="md_theme_on_tertiary_container">#FFCC80</color>
+
+    <!-- Error colors -->
+    <color name="md_theme_error">#F44336</color>
+    <color name="md_theme_on_error">#FFFFFF</color>
+    <color name="md_theme_error_container">#5D1A1A</color>
+    <color name="md_theme_on_error_container">#FFB4AB</color>
+
+    <!-- Surface colors -->
+    <color name="md_theme_surface">#0F0F0F</color>
+    <color name="md_theme_on_surface">#E6E6E6</color>
+    <color name="md_theme_surface_variant">#1A1A1A</color>
+    <color name="md_theme_on_surface_variant">#CCCCCC</color>
+
+    <!-- Background colors -->
+    <color name="md_theme_background">#000000</color>
+    <color name="md_theme_on_background">#FFFFFF</color>
+
+    <!-- Outline colors -->
+    <color name="md_theme_outline">#404040</color>
+    <color name="md_theme_outline_variant">#2A2A2A</color>
+
+    <!-- Game-specific colors -->
+    <color name="game_black">#000000</color>
+    <color name="game_white">#FFFFFF</color>
+    <color name="game_gray">#808080</color>
+    <color name="game_dark_gray">#333333</color>
+
+    <!-- Brand colors -->
+    <color name="game_primary">#00BCD4</color>
+    <color name="game_secondary">#9C27B0</color>
+    <color name="game_accent">#FF9800</color>
+
+    <!-- UI Element colors -->
+    <color name="game_title">#00E5FF</color>
+    <color name="game_subtitle">#81D4FA</color>
+    <color name="game_section_header">#00BCD4</color>
+
+    <!-- HUD colors -->
+    <color name="game_score">#4CAF50</color>
+    <color name="game_lives">#F44336</color>
+    <color name="game_wave">#00BCD4</color>
+    <color name="game_combo">#FFEB3B</color>
+
+    <!-- Button colors -->
+    <color name="game_button_background">#1A1A1A</color>
+    <color name="game_button_text">#FFFFFF</color>
+    <color name="game_control_background">#2A2A2A</color>
+    <color name="game_number_background">#1E3A8A</color>
+    <color name="game_fire_button">#DC2626</color>
+
+    <!-- Game state colors -->
+    <color name="game_danger">#F44336</color>
+    <color name="game_warning">#FF9800</color>
+    <color name="game_success">#4CAF50</color>
+    <color name="game_info">#2196F3</color>
+
+    <!-- Progress colors -->
+    <color name="game_progress_track">#333333</color>
+
+    <!-- High score rank colors -->
+    <color name="rank_gold">#FFD700</color>
+    <color name="rank_silver">#C0C0C0</color>
+    <color name="rank_bronze">#CD7F32</color>
+
+    <!-- Power-up colors -->
+    <color name="powerup_time_freeze">#2196F3</color>
+    <color name="powerup_auto_solve">#4CAF50</color>
+    <color name="powerup_shield">#9C27B0</color>
+    <color name="powerup_double_points">#FFEB3B</color>
+
+    <!-- Enemy and projectile colors -->
+    <color name="enemy_normal">#F44336</color>
+    <color name="enemy_boss">#9C27B0</color>
+    <color name="bullet_player">#FFEB3B</color>
+    <color name="explosion_correct">#4CAF50</color>
+    <color name="explosion_wrong">#F44336</color>
+    <color name="explosion_boss">#9C27B0</color>
+
+    <!-- Background variants -->
+    <color name="space_background">#000000</color>
+    <color name="galaxy_background">#0A0A1A</color>
+    <color name="nebula_background">#1A0A1A</color>
+    <color name="stars_background">#000011</color>
+
+    <!-- Semi-transparent overlays -->
+    <color name="overlay_dark">#80000000</color>
+    <color name="overlay_light">#40FFFFFF</color>
+
+    <!-- Switch selector colors -->
+    <color name="switch_thumb_on">#00BCD4</color>
+    <color name="switch_thumb_off">#808080</color>
+    <color name="switch_track_on">#4000BCD4</color>
+    <color name="switch_track_off">#40808080</color>
+
+    <!-- Dialog background -->
+    <color name="dialog_background">#E6000000</color>
+
+    <!-- Colorblind-friendly palette (optional) -->
+    <color name="colorblind_blue">#0173B2</color>
+    <color name="colorblind_orange">#DE8F05</color>
+    <color name="colorblind_green">#029E73</color>
+    <color name="colorblind_yellow">#FBB91F</color>
+    <color name="colorblind_red">#D55E00</color>
+    <color name="colorblind_purple">#CC78BC</color>
+    <color name="colorblind_gray">#949494</color>
+
+    <!-- Game difficulty colors -->
+    <color name="difficulty_easy">#4CAF50</color>
+    <color name="difficulty_medium">#FF9800</color>
+    <color name="difficulty_hard">#F44336</color>
+    <color name="difficulty_expert">#9C27B0</color>
+</resources>
+
+

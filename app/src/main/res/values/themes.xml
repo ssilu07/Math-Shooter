@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme -->
+    <style name="Base.Theme.MathShooter" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorPrimaryDark">@color/md_theme_primary_container</item>
+        <item name="colorAccent">@color/md_theme_secondary</item>
+
+        <!-- Background colors -->
+        <item name="android:colorBackground">@color/md_theme_background</item>
+
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/game_black</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
+
+        <!-- Navigation bar -->
+        <item name="android:navigationBarColor">@color/game_black</item>
+
+        <!-- Window background -->
+        <item name="android:windowBackground">@color/game_black</item>
+
+        <!-- Text colors -->
+        <item name="android:textColorPrimary">@color/game_white</item>
+        <item name="android:textColorSecondary">@color/game_gray</item>
+    </style>
+
+    <!-- Main application theme -->
+    <style name="Theme.MathShooter" parent="Base.Theme.MathShooter">
+        <!-- Add any app-specific customizations here -->
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
+    </style>
+
+    <!-- No ActionBar theme for game activities -->
+    <style name="Theme.MathShooter.NoActionBar" parent="Base.Theme.MathShooter">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+
+        <!-- Immersive mode for game -->
+        <item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+
+        <!-- Keep screen on during gameplay -->
+        <item name="android:keepScreenOn">true</item>
+    </style>
+
+    <!-- Button styles -->
+    <style name="GameButton" parent="Widget.AppCompat.Button">
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:background">@color/game_button_background</item>
+        <item name="android:textColor">@color/game_button_text</item>
+    </style>
+
+    <!-- Primary action button -->
+    <style name="GameButton.Primary">
+        <item name="backgroundTint">@color/game_primary</item>
+        <item name="android:textColor">@color/game_white</item>
+    </style>
+
+    <!-- Secondary action button -->
+    <style name="GameButton.Secondary">
+        <item name="backgroundTint">@color/game_secondary</item>
+        <item name="android:textColor">@color/game_white</item>
+    </style>
+
+    <!-- Danger button -->
+    <style name="GameButton.Danger">
+        <item name="backgroundTint">@color/game_danger</item>
+        <item name="android:textColor">@color/game_white</item>
+    </style>
+
+    <!-- Control button styles -->
+    <style name="ControlButton" parent="GameButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">60dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">18sp</item>
+        <item name="backgroundTint">@color/game_control_background</item>
+        <item name="android:textColor">@color/game_white</item>
+    </style>
+
+    <!-- Number pad button -->
+    <style name="NumberButton" parent="ControlButton">
+        <item name="android:layout_height">50dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="backgroundTint">@color/game_number_background</item>
+    </style>
+
+    <!-- Fire button -->
+    <style name="FireButton" parent="ControlButton">
+        <item name="android:layout_height">70dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="backgroundTint">@color/game_fire_button</item>
+    </style>
+
+    <!-- Text styles -->
+    <style name="GameTitle">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/game_title</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:layout_marginBottom">16dp</item>
+    </style>
+
+    <style name="GameSubtitle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/game_subtitle</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:layout_marginBottom">24dp</item>
+    </style>
+
+    <style name="SectionHeader">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/game_section_header</item>
+        <item name="android:layout_marginTop">24dp</item>
+        <item name="android:layout_marginBottom">12dp</item>
+    </style>
+
+    <style name="SettingTitle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/game_white</item>
+    </style>
+
+    <style name="SettingDescription">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/game_gray</item>
+    </style>
+
+    <!-- HUD styles -->
+    <style name="HUDText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/game_white</item>
+        <item name="android:shadowColor">@color/game_black</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">4</item>
+    </style>
+
+    <!-- Score text -->
+    <style name="ScoreText" parent="HUDText">
+        <item name="android:textColor">@color/game_score</item>
+    </style>
+
+    <!-- Lives text -->
+    <style name="LivesText" parent="HUDText">
+        <item name="android:textColor">@color/game_lives</item>
+    </style>
+
+    <!-- Wave text -->
+    <style name="WaveText" parent="HUDText">
+        <item name="android:textColor">@color/game_wave</item>
+    </style>
+
+    <!-- Combo text -->
+    <style name="ComboText" parent="HUDText">
+        <item name="android:textColor">@color/game_combo</item>
+    </style>
+
+    <!-- Dialog styles -->
+    <style name="GameDialog" parent="ThemeOverlay.AppCompat.Dialog">
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+        <item name="android:textColor">@color/game_white</item>
+    </style>
+
+    <!-- Progress bar style -->
+    <style name="GameProgressBar" parent="Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressTint">@color/game_primary</item>
+        <item name="android:progressBackgroundTint">@color/game_progress_track</item>
+    </style>
+
+    <!-- Switch style -->
+    <style name="GameSwitch" parent="Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:thumb">@color/switch_thumb_selector</item>
+        <item name="android:track">@color/switch_track_selector</item>
+    </style>
+
+    <!-- Seek bar style -->
+    <style name="GameSeekBar" parent="Widget.AppCompat.SeekBar">
+        <item name="android:progressTint">@color/game_primary</item>
+        <item name="android:progressBackgroundTint">@color/game_progress_track</item>
+        <item name="android:thumbTint">@color/game_primary</item>
+    </style>
+</resources>

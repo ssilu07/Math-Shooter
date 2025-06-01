@@ -1,0 +1,195 @@
+<resources>
+    <string name="app_name">Math Shooter</string>
+
+    <!-- Main Menu -->
+    <string name="game_title">MATH SHOOTER</string>
+    <string name="game_subtitle">Defend Earth\'s Knowledge Archives!</string>
+    <string name="start_mission">START MISSION</string>
+    <string name="practice_mode">PRACTICE MODE</string>
+    <string name="daily_challenge">DAILY CHALLENGE</string>
+    <string name="high_scores">HIGH SCORES</string>
+    <string name="settings">SETTINGS</string>
+    <string name="exit">EXIT</string>
+    <string name="high_score_display">High Score: %d</string>
+
+    <!-- Game UI -->
+    <string name="score_label">Score: %d</string>
+    <string name="lives_label">Lives: %d</string>
+    <string name="wave_label">Wave: %d</string>
+    <string name="combo_label">Combo: %dx</string>
+    <string name="selected_answer">Selected: %d</string>
+    <string name="fire_button">FIRE</string>
+    <string name="pause_button">PAUSE</string>
+
+    <!-- Power-ups -->
+    <string name="time_freeze_active">TIME FREEZE ACTIVE</string>
+    <string name="double_points_active">DOUBLE POINTS ACTIVE</string>
+    <string name="shield_active">SHIELD ACTIVE</string>
+    <string name="auto_solve_count">AUTO-SOLVE: %d</string>
+
+    <!-- Game States -->
+    <string name="wave_complete">Wave %d Complete!</string>
+    <string name="game_over">GAME OVER</string>
+    <string name="final_score">Final Score: %d</string>
+    <string name="boss_battle">BOSS BATTLE!</string>
+    <string name="boss_defeated">BOSS DEFEATED!</string>
+    <string name="accuracy_bonus">Accuracy Bonus: %d</string>
+    <string name="perfect_wave">PERFECT WAVE!</string>
+
+    <!-- High Scores -->
+    <string name="high_scores_title">HIGH SCORES</string>
+    <string name="no_scores_message">No high scores yet!\nStart playing to set your first record.</string>
+    <string name="clear_scores">CLEAR SCORES</string>
+    <string name="back">BACK</string>
+    <string name="rank_header">Rank</string>
+    <string name="score_header">Score</string>
+    <string name="wave_header">Wave</string>
+    <string name="accuracy_header">Accuracy</string>
+    <string name="date_header">Date</string>
+
+    <!-- Settings -->
+    <string name="settings_title">SETTINGS</string>
+    <string name="audio_section">AUDIO</string>
+    <string name="gameplay_section">GAMEPLAY</string>
+    <string name="difficulty_section">DIFFICULTY</string>
+    <string name="visual_section">VISUAL</string>
+    <string name="controls_section">CONTROLS</string>
+    <string name="data_section">DATA</string>
+
+    <!-- Audio Settings -->
+    <string name="sound_effects">Sound Effects</string>
+    <string name="sound_effects_desc">Enable game sound effects</string>
+    <string name="background_music">Background Music</string>
+    <string name="background_music_desc">Enable background music</string>
+    <string name="sound_volume">Sound Volume</string>
+
+    <!-- Gameplay Settings -->
+    <string name="show_hints">Show Hints</string>
+    <string name="show_hints_desc">Display solution hints on wrong answers</string>
+    <string name="vibration">Vibration</string>
+    <string name="vibration_desc">Vibrate on hits and misses</string>
+    <string name="auto_fire">Auto Fire</string>
+    <string name="auto_fire_desc">Automatically fire when answer is selected</string>
+
+    <!-- Difficulty Settings -->
+    <string name="adaptive_difficulty">Adaptive Difficulty</string>
+    <string name="adaptive_difficulty_desc">Adjust difficulty based on performance</string>
+    <string name="starting_difficulty">Starting Difficulty</string>
+    <string-array name="difficulty_options">
+        <item>Easy</item>
+        <item>Medium</item>
+        <item>Hard</item>
+        <item>Expert</item>
+    </string-array>
+
+    <!-- Visual Settings -->
+    <string name="colorblind_mode">Colorblind Mode</string>
+    <string name="colorblind_mode_desc">Use colorblind-friendly palette</string>
+    <string name="particle_effects">Particle Effects</string>
+    <string name="particle_effects_desc">Show explosion and hit effects</string>
+    <string name="background_theme">Background Theme</string>
+    <string-array name="theme_options">
+        <item>Space</item>
+        <item>Galaxy</item>
+        <item>Nebula</item>
+        <item>Stars</item>
+    </string-array>
+
+    <!-- Control Settings -->
+    <string name="touch_controls">Touch Controls</string>
+    <string name="touch_controls_desc">Enable touch screen controls</string>
+    <string name="control_sensitivity">Control Sensitivity</string>
+
+    <!-- Data Settings -->
+    <string name="save_statistics">Save Statistics</string>
+    <string name="save_statistics_desc">Save gameplay statistics</string>
+    <string name="reset_defaults">RESET TO DEFAULTS</string>
+    <string name="back_to_menu">BACK TO MENU</string>
+    <string name="settings_reset">Settings reset to defaults</string>
+
+    <!-- Practice Mode -->
+    <string name="practice_title">PRACTICE MODE</string>
+    <string name="practice_subtitle">Focus on specific math operations</string>
+    <string name="operation_type">Operation Type</string>
+    <string-array name="operation_options">
+        <item>Addition</item>
+        <item>Subtraction</item>
+        <item>Multiplication</item>
+        <item>Division</item>
+        <item>Mixed Operations</item>
+    </string-array>
+    <string name="practice_difficulty">Practice Difficulty</string>
+    <string name="start_practice">START PRACTICE</string>
+
+    <!-- Daily Challenge -->
+    <string name="daily_challenge_title">DAILY CHALLENGE</string>
+    <string name="daily_challenge_subtitle">50 mixed problems - compete globally!</string>
+    <string name="challenge_progress">Progress: %d/50</string>
+    <string name="challenge_complete">CHALLENGE COMPLETE!</string>
+    <string name="global_rank">Global Rank: #%d</string>
+    <string name="submit_score">SUBMIT SCORE</string>
+
+    <!-- Game Story -->
+    <string name="story_intro">The Null Gang threatens to erase all knowledge from Earth\'s archives. As the last Math Ranger, you must defend humanity\'s wisdom by solving equations and blasting enemy ships!</string>
+    <string name="mission_briefing">MISSION BRIEFING</string>
+    <string name="skip_intro">SKIP</string>
+    <string name="continue_button">CONTINUE</string>
+
+    <!-- Achievements -->
+    <string name="achievements">ACHIEVEMENTS</string>
+    <string name="achievement_unlocked">Achievement Unlocked!</string>
+    <string name="first_wave">First Wave</string>
+    <string name="first_wave_desc">Complete your first wave</string>
+    <string name="accuracy_master">Accuracy Master</string>
+    <string name="accuracy_master_desc">Achieve 90% accuracy in a wave</string>
+    <string name="combo_king">Combo King</string>
+    <string name="combo_king_desc">Get a 10x combo multiplier</string>
+    <string name="boss_slayer">Boss Slayer</string>
+    <string name="boss_slayer_desc">Defeat your first boss</string>
+    <string name="math_genius">Math Genius</string>
+    <string name="math_genius_desc">Reach wave 20</string>
+
+    <!-- Error Messages -->
+    <string name="error_generic">An error occurred. Please try again.</string>
+    <string name="error_save_failed">Failed to save game data</string>
+    <string name="error_load_failed">Failed to load game data</string>
+    <string name="confirm_reset">Are you sure you want to reset all data?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_welcome">Welcome to Math Shooter!</string>
+    <string name="tutorial_movement">Use the arrow buttons to move your turret left and right</string>
+    <string name="tutorial_shooting">Select the correct answer using the number pad, then press FIRE</string>
+    <string name="tutorial_enemies">Destroy enemies before they reach the bottom</string>
+    <string name="tutorial_powerups">Collect power-ups for special abilities</string>
+    <string name="tutorial_complete">Tutorial Complete! Good luck, Math Ranger!</string>
+    <string name="skip_tutorial">Skip Tutorial</string>
+
+    <!-- Pause Menu -->
+    <string name="game_paused">GAME PAUSED</string>
+    <string name="resume_game">RESUME</string>
+    <string name="restart_game">RESTART</string>
+    <string name="main_menu">MAIN MENU</string>
+    <string name="confirm_quit">Quit current game?</string>
+    <string name="progress_lost">Your progress will be lost.</string>
+
+    <!-- Statistics -->
+    <string name="statistics">STATISTICS</string>
+    <string name="total_shots">Total Shots: %d</string>
+    <string name="total_hits">Total Hits: %d</string>
+    <string name="total_misses">Total Misses: %d</string>
+    <string name="overall_accuracy">Overall Accuracy: %.1f%%</string>
+    <string name="session_time">Session Time: %s</string>
+    <string name="shots_per_minute">Shots/Min: %.1f</string>
+    <string name="best_combo">Best Combo: %dx</string>
+    <string name="waves_completed">Waves Completed: %d</string>
+    <string name="bosses_defeated">Bosses Defeated: %d</string>
+    <string name="powerups_collected">Power-ups Collected: %d</string>
+
+    <!-- Time formatting -->
+    <string name="time_minutes_seconds">%d:%02d</string>
+    <string name="time_hours_minutes_seconds">%d:%02d:%02d</string>
+</resources>
