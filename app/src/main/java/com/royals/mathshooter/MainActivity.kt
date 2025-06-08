@@ -526,8 +526,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         try {
-            if (::gameView.isInitialized && gameView.gameState == GameState.PLAYING) {
-                gameView.pauseGame()
+            if (::gameView.isInitialized) {
+                when (gameView.gameState) {
+                    GameState.PLAYING -> {
+                        // First back press pauses the game
+                        gameView.pauseGame()
+                        showPauseDialog()
+                    }
+                    GameState.PAUSED -> {
+                        // If already paused, show pause options
+                        showPauseDialog()
+                    }
+                    GameState.GAME_OVER -> {
+                        // If game over, show exit dialog
+                        showExitDialog()
+                    }
+                    else -> {
+                        // For any other state, show exit dialog
+                        showExitDialog()
+                    }
+                }
             } else {
                 showExitDialog()
             }
@@ -540,18 +558,127 @@ class MainActivity : AppCompatActivity() {
     private fun showExitDialog() {
         try {
             AlertDialog.Builder(this)
-                .setTitle("Exit Game")
-                .setMessage("Are you sure you want to exit?")
-                .setPositiveButton("Yes") { _, _ ->
-                    super.onBackPressed()
+                .setTitle("Exit Game?")
+                .setMessage("Do you want to return to the main menu?\n\nYour progress will be lost.")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("YES") { _, _ ->
+                    // Return to main menu
+                    finish()
                 }
-                .setNegativeButton("No", null)
-                .show()
+                .setNegativeButton("NO") { dialog, _ ->
+                    // Stay in game and resume if it was paused
+                    dialog.dismiss()
+                    try {
+                        if (::gameView.isInitialized && gameView.gameState == GameState.PAUSED) {
+                            gameView.pauseGame() // This will resume the game
+                        }
+                    } catch (e: Exception) {
+                        println("❌ Error resuming game: ${e.message}")
+                    }
+                }
+                .setCancelable(false) // Prevent dismissing by tapping outside
+                .create()
+                .apply {
+                    // Style the dialog buttons
+                    setOnShowListener {
+                        getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
+                            setTextColor(Color.parseColor("#FF5722")) // Red color for YES
+                            textSize = 16f
+                            typeface = Typeface.DEFAULT_BOLD
+                        }
+                        getButton(AlertDialog.BUTTON_NEGATIVE)?.apply {
+                            setTextColor(Color.parseColor("#4CAF50")) // Green color for NO
+                            textSize = 16f
+                            typeface = Typeface.DEFAULT_BOLD
+                        }
+                    }
+                    show()
+                }
         } catch (e: Exception) {
             println("❌ Error showing exit dialog: ${e.message}")
-            super.onBackPressed()
+            // Fallback: just exit the activity
+            finish()
         }
     }
+
+    private fun showPauseDialog() {
+        try {
+            val dialog = AlertDialog.Builder(this)
+                .setTitle("Game Paused")
+                .setMessage("What would you like to do?")
+                // Remove this line to eliminate the duplicate icon:
+                // .setIcon(android.R.drawable.ic_media_pause)
+                .setPositiveButton("RESUME") { dialog, _ ->
+                    dialog.dismiss()
+                    try {
+                        if (::gameView.isInitialized) {
+                            gameView.pauseGame()
+                        }
+                    } catch (e: Exception) {
+                        println("❌ Error resuming game: ${e.message}")
+                    }
+                }
+                .setNegativeButton("MAIN MENU") { _, _ ->
+                    finish()
+                }
+                .setNeutralButton("RESTART") { _, _ ->
+                    try {
+                        if (::gameView.isInitialized) {
+                            gameView.initializeGame()
+                        }
+                    } catch (e: Exception) {
+                        println("❌ Error restarting game: ${e.message}")
+                        finish()
+                    }
+                }
+                .setCancelable(false)
+                .create()
+
+            dialog.setOnShowListener {
+                // Style title
+                val titleId = resources.getIdentifier("alertTitle", "id", "android")
+                if (titleId > 0) {
+                    dialog.findViewById<TextView>(titleId)?.apply {
+                        setTextColor(Color.BLACK)
+                        textSize = 20f
+                        typeface = Typeface.DEFAULT_BOLD
+                        gravity = android.view.Gravity.CENTER
+                    }
+                }
+
+                // Style message
+                val messageId = android.R.id.message
+                dialog.findViewById<TextView>(messageId)?.apply {
+                    setTextColor(Color.GRAY)
+                    textSize = 16f
+                    gravity = android.view.Gravity.CENTER
+                    setPadding(20, 20, 20, 40)
+                }
+
+                // Style buttons
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
+                    setTextColor(Color.parseColor("#4CAF50"))
+                    textSize = 16f
+                    typeface = Typeface.DEFAULT_BOLD
+                }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.apply {
+                    setTextColor(Color.parseColor("#FF5722"))
+                    textSize = 16f
+                    typeface = Typeface.DEFAULT_BOLD
+                }
+                dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.apply {
+                    setTextColor(Color.parseColor("#2196F3"))
+                    textSize = 16f
+                    typeface = Typeface.DEFAULT_BOLD
+                }
+            }
+
+            dialog.show()
+        } catch (e: Exception) {
+            println("❌ Error showing pause dialog: ${e.message}")
+        }
+    }
+
 }
 
 class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView: GameView) : Thread() {

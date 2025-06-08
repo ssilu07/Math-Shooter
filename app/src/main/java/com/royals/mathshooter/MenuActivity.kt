@@ -2,6 +2,8 @@ package com.royals.mathshooter
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
@@ -219,16 +221,54 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun showPracticeConfirmation(operationName: String, difficulty: String) {
-        AlertDialog.Builder(this)
+        val dialog = AlertDialog.Builder(this)
             .setTitle("Start Practice Session")
             .setMessage("Ready to practice $operationName?\n\n$difficulty")
-            .setPositiveButton("Start Practice") { _, _ ->
+            .setPositiveButton("START PRACTICE") { _, _ ->
                 startGame(GameMode.PRACTICE)
             }
-            .setNegativeButton("Back") { _, _ ->
+            .setNegativeButton("BACK") { _, _ ->
                 showPracticeMenu()
             }
-            .show()
+            .setCancelable(false)
+            .create()
+
+        // Style the dialog to make title and message visible
+        dialog.setOnShowListener {
+            // Style title
+            val titleId = resources.getIdentifier("alertTitle", "id", "android")
+            if (titleId > 0) {
+                dialog.findViewById<TextView>(titleId)?.apply {
+                    setTextColor(Color.BLACK)
+                    textSize = 20f
+                    typeface = Typeface.DEFAULT_BOLD
+                    gravity = android.view.Gravity.CENTER
+                }
+            }
+
+            // Style message
+            val messageId = android.R.id.message
+            dialog.findViewById<TextView>(messageId)?.apply {
+                setTextColor(Color.DKGRAY)
+                textSize = 16f
+                gravity = android.view.Gravity.CENTER
+                setPadding(20, 20, 20, 40)
+            }
+
+            // Style buttons
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
+                setTextColor(Color.parseColor("#9C27B0")) // Purple for START PRACTICE
+                textSize = 16f
+                typeface = Typeface.DEFAULT_BOLD
+            }
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.apply {
+                setTextColor(Color.parseColor("#FF5722")) // Red for BACK
+                textSize = 16f
+                typeface = Typeface.DEFAULT_BOLD
+            }
+        }
+
+        dialog.show()
     }
 
     private fun showLeaderboard() {

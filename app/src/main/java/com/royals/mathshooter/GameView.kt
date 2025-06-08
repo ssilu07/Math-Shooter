@@ -152,7 +152,7 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         solutionBoxesLayout = layout
     }
 
-    private fun initializeGame() {
+    fun initializeGame() {
         gameState = GameState.PLAYING
         score = 0
         lives = 3
@@ -1206,7 +1206,7 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         }
     }
 
-    private fun drawEnemies(canvas: Canvas) {
+/*    private fun drawEnemies(canvas: Canvas) {
         enemies.forEach { enemy ->
             val enemySize = if (enemy.isBoss) 60f else 40f
 
@@ -1262,7 +1262,209 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
                     Paint().apply { color = Color.RED })
             }
         }
+    }*/
+
+    private fun drawEnemies(canvas: Canvas) {
+        enemies.forEach { enemy ->
+            drawNeonEnemy(canvas, enemy)
+        }
     }
+
+    private fun drawNeonEnemy(canvas: Canvas, enemy: Enemy) {
+        // Dynamic enemy size based on type
+        val enemyWidth = if (enemy.isBoss) 140f else 120f
+        val enemyHeight = if (enemy.isBoss) 80f else 60f
+        val cornerRadius = 12f
+
+        // Calculate enemy bounds
+        val left = enemy.x - enemyWidth / 2
+        val top = enemy.y - enemyHeight / 2
+        val right = enemy.x + enemyWidth / 2
+        val bottom = enemy.y + enemyHeight / 2
+        val rect = RectF(left, top, right, bottom)
+
+        // Dynamic colors based on difficulty level
+        val (fillColor, glowColor) = when (currentDifficultyLevel) {
+            1 -> Pair("#800000", "#FF0000")  // Dark Red -> Red Glow
+            2 -> Pair("#804000", "#FF8000")  // Dark Orange -> Orange Glow
+            3 -> Pair("#660000", "#FF3300")  // Dark Red -> Bright Red Glow
+            4 -> Pair("#660033", "#CC0066")  // Dark Pink -> Pink Glow
+            5 -> Pair("#4D0066", "#9900CC")  // Dark Purple -> Purple Glow
+            6 -> Pair("#330066", "#6600FF")  // Dark Blue -> Blue Glow
+            7 -> Pair("#003366", "#0066FF")  // Dark Blue -> Bright Blue Glow
+            8 -> Pair("#006666", "#00CCFF")  // Dark Cyan -> Cyan Glow
+            9 -> Pair("#004D00", "#00FF99")  // Dark Green -> Green Glow
+            else -> Pair("#666600", "#FFFF00") // Dark Yellow -> Yellow Glow
+        }
+
+        // Boss enemies get special magenta coloring
+        val (finalFillColor, finalGlowColor) = if (enemy.isBoss) {
+            Pair("#660066", "#FF00FF") // Dark Magenta -> Magenta Glow
+        } else {
+            Pair(fillColor, glowColor)
+        }
+
+        // Create multiple glow layers for neon effect
+        drawNeonGlowLayers(canvas, rect, cornerRadius, finalGlowColor)
+
+        // Draw main enemy body
+        drawEnemyBody(canvas, rect, cornerRadius, finalFillColor, finalGlowColor)
+
+        // Draw equation text
+        drawEnemyEquation(canvas, enemy, rect)
+
+        // Draw boss health bar if needed
+        if (enemy.isBoss) {
+            drawBossHealthBar(canvas, enemy, rect)
+        }
+    }
+
+    private fun drawNeonGlowLayers(canvas: Canvas, rect: RectF, cornerRadius: Float, glowColor: String) {
+        // Outer glow layers (multiple layers for stronger effect)
+        val glowPaint = Paint().apply {
+            style = Paint.Style.STROKE
+            isAntiAlias = true
+        }
+
+        // Layer 1: Outermost glow (very transparent)
+        glowPaint.apply {
+            color = Color.parseColor(glowColor)
+            alpha = 30
+            strokeWidth = 8f
+            maskFilter = BlurMaskFilter(12f, BlurMaskFilter.Blur.NORMAL)
+        }
+        canvas.drawRoundRect(
+            RectF(rect.left - 4, rect.top - 4, rect.right + 4, rect.bottom + 4),
+            cornerRadius + 4, cornerRadius + 4, glowPaint
+        )
+
+        // Layer 2: Middle glow
+        glowPaint.apply {
+            alpha = 60
+            strokeWidth = 4f
+            maskFilter = BlurMaskFilter(6f, BlurMaskFilter.Blur.NORMAL)
+        }
+        canvas.drawRoundRect(
+            RectF(rect.left - 2, rect.top - 2, rect.right + 2, rect.bottom + 2),
+            cornerRadius + 2, cornerRadius + 2, glowPaint
+        )
+
+        // Layer 3: Inner glow (brightest)
+        glowPaint.apply {
+            alpha = 120
+            strokeWidth = 2f
+            maskFilter = BlurMaskFilter(3f, BlurMaskFilter.Blur.NORMAL)
+        }
+        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, glowPaint)
+    }
+
+    private fun drawEnemyBody(canvas: Canvas, rect: RectF, cornerRadius: Float, fillColor: String, borderColor: String) {
+        // Fill the enemy body
+        val bodyPaint = Paint().apply {
+            color = Color.parseColor(fillColor)
+            style = Paint.Style.FILL
+            isAntiAlias = true
+            alpha = 180 // Semi-transparent for glow effect
+        }
+        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, bodyPaint)
+
+        // Draw the glowing border
+        val borderPaint = Paint().apply {
+            color = Color.parseColor(borderColor)
+            style = Paint.Style.STROKE
+            strokeWidth = 3f
+            isAntiAlias = true
+            alpha = 255 // Full opacity for bright border
+        }
+        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, borderPaint)
+    }
+
+    private fun drawEnemyEquation(canvas: Canvas, enemy: Enemy, rect: RectF) {
+        // Enhanced equation paint with glow effect
+        val equationPaint = Paint().apply {
+            color = Color.WHITE
+            textSize = if (enemy.isBoss) 28f else 24f
+            textAlign = Paint.Align.CENTER
+            isAntiAlias = true
+            typeface = Typeface.DEFAULT_BOLD
+            setShadowLayer(4f, 0f, 0f, Color.parseColor("#00FFFF")) // Cyan glow shadow
+        }
+
+        // Draw equation text centered in the enemy
+        val textY = rect.centerY() + (equationPaint.textSize / 3) // Adjust for vertical centering
+        canvas.drawText(enemy.equation, rect.centerX(), textY, equationPaint)
+    }
+
+    private fun drawBossHealthBar(canvas: Canvas, enemy: Enemy, rect: RectF) {
+        val healthPercent = gameEngine.getBossHealthPercentage()
+        val barWidth = rect.width() - 20f
+        val barHeight = 8f
+        val barLeft = rect.left + 10f
+        val barTop = rect.top - 25f
+        val barRight = barLeft + barWidth
+        val barBottom = barTop + barHeight
+
+        // Background bar (dark)
+        val bgPaint = Paint().apply {
+            color = Color.parseColor("#333333")
+            style = Paint.Style.FILL
+            isAntiAlias = true
+        }
+        canvas.drawRoundRect(
+            RectF(barLeft, barTop, barRight, barBottom),
+            4f, 4f, bgPaint
+        )
+
+        // Health bar (glowing red)
+        val healthPaint = Paint().apply {
+            color = Color.parseColor("#FF0000")
+            style = Paint.Style.FILL
+            isAntiAlias = true
+            setShadowLayer(4f, 0f, 0f, Color.parseColor("#FF6666")) // Red glow
+        }
+        canvas.drawRoundRect(
+            RectF(barLeft, barTop, barLeft + (barWidth * healthPercent), barBottom),
+            4f, 4f, healthPaint
+        )
+
+        // Health bar border
+        val borderPaint = Paint().apply {
+            color = Color.parseColor("#FF4444")
+            style = Paint.Style.STROKE
+            strokeWidth = 2f
+            isAntiAlias = true
+        }
+        canvas.drawRoundRect(
+            RectF(barLeft, barTop, barRight, barBottom),
+            4f, 4f, borderPaint
+        )
+    }
+
+    // Additional method to create animated pulsing effect (optional)
+    private fun drawPulsingEffect(canvas: Canvas, enemy: Enemy) {
+        if (enemy.isBoss) {
+            val pulseRadius = 30f + (System.currentTimeMillis() % 1000) / 50f
+            val pulsePaint = Paint().apply {
+                color = Color.parseColor("#FF00FF")
+                style = Paint.Style.STROKE
+                strokeWidth = 2f
+                alpha = (100 - (System.currentTimeMillis() % 1000) / 10).toInt().coerceIn(20, 100)
+                isAntiAlias = true
+            }
+            canvas.drawCircle(enemy.x, enemy.y, pulseRadius, pulsePaint)
+        }
+    }
+
+    // Enhanced method with all effects combined
+    private fun drawEnhancedNeonEnemy(canvas: Canvas, enemy: Enemy) {
+        drawNeonEnemy(canvas, enemy)
+
+        // Add pulsing effect for bosses
+        if (enemy.isBoss) {
+            drawPulsingEffect(canvas, enemy)
+        }
+    }
+
 
     private fun drawBackground(canvas: Canvas) {
         val random = Random(42)
