@@ -141,28 +141,93 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun showPracticeMenu() {
-        val options = resources.getStringArray(R.array.operation_options)
+        val operations = arrayOf(
+            "Addition (+)",
+            "Subtraction (−)",
+            "Multiplication (×)",
+            "Division (÷)",
+            "Mixed Operations"
+        )
 
         AlertDialog.Builder(this)
             .setTitle("Choose Practice Type")
-            .setItems(options) { _, which ->
+            .setItems(operations) { _, which ->
                 sharedPreferences.edit().putInt("practice_type", which).apply()
-                showDifficultyMenu()
+                showDifficultyMenu(which)
             }
-            .setNegativeButton(getString(R.string.cancel), null)
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
-    private fun showDifficultyMenu() {
-        val difficulties = resources.getStringArray(R.array.difficulty_options)
+    private fun showDifficultyMenu(operationType: Int) {
+        val operationName = when (operationType) {
+            0 -> "Addition"
+            1 -> "Subtraction"
+            2 -> "Multiplication"
+            3 -> "Division"
+            4 -> "Mixed Operations"
+            else -> "Math"
+        }
+
+        val difficulties = when (operationType) {
+            0 -> arrayOf( // Addition
+                "Easy - 2-digit addition (10-99)",
+                "Medium - 3-digit addition (100-999)",
+                "Hard - 4-digit addition (1000-9999)",
+                "Expert - 5-digit addition (10000-99999)"
+            )
+            1 -> arrayOf( // Subtraction
+                "Easy - 2-digit subtraction",
+                "Medium - 3-digit subtraction",
+                "Hard - 4-digit subtraction",
+                "Expert - 5-digit subtraction"
+            )
+            2 -> arrayOf( // Multiplication
+                "Easy - 1-digit × 2-digit",
+                "Medium - 2-digit × 2-digit",
+                "Hard - 2-digit × 3-digit",
+                "Expert - 3-digit × 3-digit"
+            )
+            3 -> arrayOf( // Division
+                "Easy - 2-digit ÷ 1-digit",
+                "Medium - 3-digit ÷ 1-digit",
+                "Hard - 3-digit ÷ 2-digit",
+                "Expert - 4-digit ÷ 2-digit"
+            )
+            4 -> arrayOf( // Mixed
+                "Easy - Basic mixed operations",
+                "Medium - Intermediate mixed operations",
+                "Hard - Advanced mixed operations",
+                "Expert - Complex mixed operations"
+            )
+            else -> arrayOf("Easy", "Medium", "Hard", "Expert")
+        }
 
         AlertDialog.Builder(this)
-            .setTitle("Choose Difficulty")
+            .setTitle("$operationName Practice - Choose Difficulty")
             .setItems(difficulties) { _, which ->
                 sharedPreferences.edit().putInt("practice_difficulty", which + 1).apply()
+
+                // Show confirmation message
+                val selectedDifficulty = difficulties[which]
+                showPracticeConfirmation(operationName, selectedDifficulty)
+            }
+            .setNegativeButton("Back") { _, _ ->
+                showPracticeMenu() // Go back to operation selection
+            }
+            .show()
+    }
+
+    private fun showPracticeConfirmation(operationName: String, difficulty: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Start Practice Session")
+            .setMessage("Ready to practice $operationName?\n\n$difficulty")
+            .setPositiveButton("Start Practice") { _, _ ->
                 startGame(GameMode.PRACTICE)
             }
-            .setNegativeButton(getString(R.string.cancel), null)
+            .setNegativeButton("Back") { _, _ ->
+                showPracticeMenu()
+            }
             .show()
     }
 

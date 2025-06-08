@@ -1,6 +1,5 @@
 package com.royals.mathshooter
 
-
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -61,7 +60,7 @@ enum class GameState {
     MENU, PLAYING, PAUSED, GAME_OVER, WAVE_COMPLETE, SETTINGS
 }
 
-// Updated MainActivity.kt - Solution Box System
+// Updated MainActivity.kt - Solution Box System with Enhanced Error Handling
 
 class MainActivity : AppCompatActivity() {
     private lateinit var gameView: GameView
@@ -80,46 +79,61 @@ class MainActivity : AppCompatActivity() {
         // Hide action bar for immersive gaming
         supportActionBar?.hide()
 
-        // Get game mode from intent
-        val gameModeString = intent.getStringExtra("game_mode") ?: "normal"
-        val gameMode = when (gameModeString) {
-            "practice" -> GameMode.PRACTICE
-            "daily_challenge" -> GameMode.DAILY_CHALLENGE
-            "boss_rush" -> GameMode.BOSS_RUSH
-            else -> GameMode.NORMAL
-        }
+        try {
+            // Get game mode from intent
+            val gameModeString = intent.getStringExtra("game_mode") ?: "normal"
+            val gameMode = when (gameModeString) {
+                "practice" -> GameMode.PRACTICE
+                "daily_challenge" -> GameMode.DAILY_CHALLENGE
+                "boss_rush" -> GameMode.BOSS_RUSH
+                else -> GameMode.NORMAL
+            }
 
-        // Create main layout
-        val mainLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
+            // Create main layout
+            val mainLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                )
+                setBackgroundColor(Color.BLACK)
+            }
+
+            // Create HUD
+            createHUD(mainLayout)
+
+            // Create game view
+            gameView = GameView(this)
+            gameView.layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
+                0,
+                1f
             )
-            setBackgroundColor(Color.BLACK)
+            gameView.setGameMode(gameMode)
+            mainLayout.addView(gameView)
+
+            // Create new solution box controls
+            createSolutionBoxControls(mainLayout)
+
+            setContentView(mainLayout)
+
+            // Connect UI elements to game view
+            gameView.setUIElements(scoreText, livesText, waveText, comboText, difficultyText)
+            gameView.setSolutionBoxesLayout(solutionBoxesLayout)
+
+        } catch (e: Exception) {
+            // FIXED: Handle any initialization errors gracefully
+            println("❌ Error initializing MainActivity: ${e.message}")
+            e.printStackTrace()
+
+            // Show a simple error message and finish
+            AlertDialog.Builder(this)
+                .setTitle("Error")
+                .setMessage("Failed to initialize game. Please restart the app.")
+                .setPositiveButton("OK") { _, _ -> finish() }
+                .setCancelable(false)
+                .show()
         }
-
-        // Create HUD
-        createHUD(mainLayout)
-
-        // Create game view
-        gameView = GameView(this)
-        gameView.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            0,
-            1f
-        )
-        gameView.setGameMode(gameMode)
-        mainLayout.addView(gameView)
-
-        // Create new solution box controls
-        createSolutionBoxControls(mainLayout)
-
-        setContentView(mainLayout)
-
-        // Connect UI elements to game view
-        gameView.setUIElements(scoreText, livesText, waveText, comboText, difficultyText)
-        gameView.setSolutionBoxesLayout(solutionBoxesLayout)
     }
 
     private fun createHUD(parent: LinearLayout) {
@@ -130,7 +144,8 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
             setPadding(16, 16, 16, 8)
-            background = ContextCompat.getDrawable(this@MainActivity, android.R.drawable.screen_background_dark_transparent)
+            // FIXED: Use direct color instead of resource that might not exist
+            setBackgroundColor(Color.parseColor("#80000000")) // Semi-transparent black
         }
 
         // First row - Score and Lives
@@ -167,7 +182,13 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            setOnClickListener { gameView.pauseGame() }
+            setOnClickListener {
+                try {
+                    gameView.pauseGame()
+                } catch (e: Exception) {
+                    println("❌ Error pausing game: ${e.message}")
+                }
+            }
         }
 
         firstRow.addView(scoreText)
@@ -220,7 +241,8 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            background = ContextCompat.getDrawable(this@MainActivity, android.R.drawable.screen_background_dark)
+            // FIXED: Use direct color instead of resource that might not exist
+            setBackgroundColor(Color.parseColor("#1A1A1A")) // Dark background
             setPadding(12, 12, 12, 12)
         }
 
@@ -238,12 +260,16 @@ class MainActivity : AppCompatActivity() {
                 setMargins(4, 4, 4, 4)
             }
             setOnTouchListener { _, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        gameView.setMovement(-1)
-                        hapticFeedback()
+                try {
+                    when (event.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            gameView.setMovement(-1)
+                            hapticFeedback()
+                        }
+                        MotionEvent.ACTION_UP -> gameView.setMovement(0)
                     }
-                    MotionEvent.ACTION_UP -> gameView.setMovement(0)
+                } catch (e: Exception) {
+                    println("❌ Error handling left button: ${e.message}")
                 }
                 true
             }
@@ -254,8 +280,12 @@ class MainActivity : AppCompatActivity() {
                 setMargins(4, 4, 4, 4)
             }
             setOnClickListener {
-                gameView.fire()
-                hapticFeedback()
+                try {
+                    gameView.fire()
+                    hapticFeedback()
+                } catch (e: Exception) {
+                    println("❌ Error firing: ${e.message}")
+                }
             }
         }
 
@@ -264,12 +294,16 @@ class MainActivity : AppCompatActivity() {
                 setMargins(4, 4, 4, 4)
             }
             setOnTouchListener { _, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        gameView.setMovement(1)
-                        hapticFeedback()
+                try {
+                    when (event.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            gameView.setMovement(1)
+                            hapticFeedback()
+                        }
+                        MotionEvent.ACTION_UP -> gameView.setMovement(0)
                     }
-                    MotionEvent.ACTION_UP -> gameView.setMovement(0)
+                } catch (e: Exception) {
+                    println("❌ Error handling right button: ${e.message}")
                 }
                 true
             }
@@ -314,57 +348,94 @@ class MainActivity : AppCompatActivity() {
             setPadding(8, 8, 8, 8)
         }
 
-        // Initially create placeholder boxes
-        updateSolutionBoxes(listOf(0, 0, 0))
+        // Initially show waiting message instead of placeholder zeros
+        updateSolutionBoxes(listOf()) // Empty list = waiting state
 
         controlsLayout.addView(solutionBoxesLayout)
     }
 
     fun updateSolutionBoxes(answers: List<Int>) {
-        // Clear existing boxes
-        solutionBoxesLayout.removeAllViews()
+        try {
+            // Clear existing boxes
+            solutionBoxesLayout.removeAllViews()
 
-        // Create new solution boxes
-        answers.forEachIndexed { index, answer ->
-            val solutionBox = Button(this).apply {
-                text = answer.toString()
-                textSize = 24f
-                setTextColor(Color.WHITE)
-                typeface = Typeface.DEFAULT_BOLD
-
-                // Create modern button background
-                background = createSolutionBoxBackground(false)
-
-                layoutParams = LinearLayout.LayoutParams(
-                    0,
-                    120,
-                    1f
-                ).apply {
-                    setMargins(8, 8, 8, 8)
+            if (answers.isEmpty()) {
+                // Show "waiting for enemies" state instead of zeros
+                val waitingMessage = TextView(this).apply {
+                    text = "Waiting for enemies..."
+                    textSize = 18f
+                    setTextColor(Color.GRAY)
+                    typeface = Typeface.DEFAULT_BOLD
+                    gravity = android.view.Gravity.CENTER
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        120
+                    ).apply {
+                        setMargins(16, 16, 16, 16)
+                    }
                 }
-
-                // Remove default button padding
-                setPadding(0, 0, 0, 0)
-                stateListAnimator = null
-
-                // Center the text
-                gravity = android.view.Gravity.CENTER
-
-                setOnClickListener {
-                    hapticFeedback()
-                    gameView.selectSolutionBox(index, answer)
-                    updateSolutionBoxSelection(index)
-                }
+                solutionBoxesLayout.addView(waitingMessage)
+                return
             }
-            solutionBoxesLayout.addView(solutionBox)
+
+            // Create new solution boxes only when we have valid answers
+            answers.forEachIndexed { index, answer ->
+                val solutionBox = Button(this).apply {
+                    text = answer.toString()
+                    textSize = 24f
+                    setTextColor(Color.WHITE)
+                    typeface = Typeface.DEFAULT_BOLD
+
+                    // Create modern button background
+                    background = createSolutionBoxBackground(false)
+
+                    layoutParams = LinearLayout.LayoutParams(
+                        0,
+                        120,
+                        1f
+                    ).apply {
+                        setMargins(8, 8, 8, 8)
+                    }
+
+                    // Remove default button padding
+                    setPadding(0, 0, 0, 0)
+                    stateListAnimator = null
+
+                    // Center the text
+                    gravity = android.view.Gravity.CENTER
+
+                    setOnClickListener {
+                        try {
+                            hapticFeedback()
+                            gameView.selectSolutionBox(index, answer)
+                            updateSolutionBoxSelection(index)
+                        } catch (e: Exception) {
+                            println("❌ Error selecting solution box: ${e.message}")
+                        }
+                    }
+                }
+                solutionBoxesLayout.addView(solutionBox)
+            }
+        } catch (e: Exception) {
+            println("❌ Error updating solution boxes: ${e.message}")
+            e.printStackTrace()
         }
     }
 
     fun updateSolutionBoxSelection(selectedIndex: Int) {
-        // Update visual state of all solution boxes
-        for (i in 0 until solutionBoxesLayout.childCount) {
-            val box = solutionBoxesLayout.getChildAt(i) as Button
-            box.background = createSolutionBoxBackground(i == selectedIndex)
+        try {
+            // Only update if we have actual solution boxes (not the waiting message)
+            if (solutionBoxesLayout.childCount > 0 && solutionBoxesLayout.getChildAt(0) is Button) {
+                // Update visual state of all solution boxes
+                for (i in 0 until solutionBoxesLayout.childCount) {
+                    val child = solutionBoxesLayout.getChildAt(i)
+                    if (child is Button) {
+                        child.background = createSolutionBoxBackground(i == selectedIndex)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            println("❌ Error updating solution box selection: ${e.message}")
         }
     }
 
@@ -426,43 +497,62 @@ class MainActivity : AppCompatActivity() {
                 vibrator.vibrate(50)
             }
         } catch (e: Exception) {
-            // Haptic feedback not available
+            // FIXED: Haptic feedback not available - don't crash
+            println("❌ Haptic feedback not available: ${e.message}")
         }
     }
 
     override fun onPause() {
         super.onPause()
-        gameView.pause()
+        try {
+            if (::gameView.isInitialized) {
+                gameView.pause()
+            }
+        } catch (e: Exception) {
+            println("❌ Error pausing game: ${e.message}")
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        gameView.resume()
+        try {
+            if (::gameView.isInitialized) {
+                gameView.resume()
+            }
+        } catch (e: Exception) {
+            println("❌ Error resuming game: ${e.message}")
+        }
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
-        if (gameView.gameState == GameState.PLAYING) {
-            gameView.pauseGame()
-        } else {
-            showExitDialog()
+        try {
+            if (::gameView.isInitialized && gameView.gameState == GameState.PLAYING) {
+                gameView.pauseGame()
+            } else {
+                showExitDialog()
+            }
+        } catch (e: Exception) {
+            println("❌ Error handling back press: ${e.message}")
+            super.onBackPressed()
         }
     }
 
     private fun showExitDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("Exit Game")
-            .setMessage("Are you sure you want to exit?")
-            .setPositiveButton("Yes") { _, _ ->
-                super.onBackPressed()
-            }
-            .setNegativeButton("No", null)
-            .show()
+        try {
+            AlertDialog.Builder(this)
+                .setTitle("Exit Game")
+                .setMessage("Are you sure you want to exit?")
+                .setPositiveButton("Yes") { _, _ ->
+                    super.onBackPressed()
+                }
+                .setNegativeButton("No", null)
+                .show()
+        } catch (e: Exception) {
+            println("❌ Error showing exit dialog: ${e.message}")
+            super.onBackPressed()
+        }
     }
 }
-
-
-
 
 class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView: GameView) : Thread() {
     private var running = false
@@ -489,12 +579,15 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
                     gameView.draw(canvas)
                 }
             } catch (e: Exception) {
+                // FIXED: Better error handling for game thread
+                println("❌ Error in game thread: ${e.message}")
                 e.printStackTrace()
             } finally {
                 if (canvas != null) {
                     try {
                         surfaceHolder.unlockCanvasAndPost(canvas)
                     } catch (e: Exception) {
+                        println("❌ Error unlocking canvas: ${e.message}")
                         e.printStackTrace()
                     }
                 }
@@ -507,11 +600,10 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
                 try {
                     sleep(waitTime)
                 } catch (e: Exception) {
+                    println("❌ Error in game thread sleep: ${e.message}")
                     e.printStackTrace()
                 }
             }
         }
     }
 }
-
-

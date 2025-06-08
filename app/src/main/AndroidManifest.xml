@@ -31,8 +31,7 @@
         <activity
             android:name=".SplashActivity"
             android:exported="true"
-            android:theme="@style/Theme.MathShooter.NoActionBar"
-            android:screenOrientation="portrait">
+            android:theme="@style/Theme.MathShooter.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -43,14 +42,12 @@
         <activity
             android:name=".MenuActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.MathShooter" />
 
         <!-- Main Game Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.MathShooter.NoActionBar"
             android:configChanges="orientation|keyboardHidden|screenSize" />
 
@@ -58,7 +55,6 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.MathShooter"
             android:parentActivityName=".MenuActivity" />
 
@@ -66,7 +62,6 @@
         <activity
             android:name=".LeaderboardActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.MathShooter"
             android:parentActivityName=".MenuActivity" />
 

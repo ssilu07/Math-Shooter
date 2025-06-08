@@ -19,7 +19,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.random.Random
 
-// Updated GameView.kt - Solution Box System
+// Updated GameView.kt - Solution Box System with Fixed Power-up Handling
 
 class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(context, attrs), SurfaceHolder.Callback {
 
@@ -91,8 +91,6 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
 
     // Game mode
     private var gameMode = GameMode.NORMAL
-
-
 
     // SharedPreferences for settings
     private val sharedPreferences = context.getSharedPreferences("MathShooterPrefs", Context.MODE_PRIVATE)
@@ -178,11 +176,39 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         bossEnemy = null
         isBossWave = false
         lastEnemySpawn = System.currentTimeMillis()
-        enemySpawnDelay = max(2000L, 5000L - (wave * 200L))
+
+        // REDUCE initial spawn delay to fix the waiting issue
+        enemySpawnDelay = 1000L // Reduced from 2000L+ to 1 second
 
         gameEngine.initializeGame(gameMode)
 
-        println("🎮 Game initialized")
+        // SPAWN FIRST ENEMY IMMEDIATELY
+        spawnFirstEnemy()
+
+        println("🎮 Game initialized with immediate first enemy")
+    }
+
+    private fun spawnFirstEnemy() {
+        // Spawn the first enemy immediately when game starts
+        val equation = when (gameMode) {
+            GameMode.PRACTICE -> gameEngine.generatePracticeEquation()
+            else -> gameEngine.generateEquationForDifficulty(1) // Start with difficulty 1
+        }
+
+        val enemy = Enemy(
+            x = Random.nextFloat() * (width - 100f) + 50f,
+            y = 50f,
+            equation = equation.first,
+            answer = equation.second,
+            speed = if (gameMode == GameMode.PRACTICE) 1.0f else 0.8f,
+            id = nextEnemyId++
+        )
+        enemies.add(enemy)
+
+        println("🎯 Spawned first enemy immediately: ${enemy.equation} = ${enemy.answer}")
+
+        // Generate solution boxes for the first enemy
+        generateNewSolutionBoxes()
     }
 
     fun setMovement(direction: Int) {
@@ -213,7 +239,7 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         val targetEnemy = enemies.firstOrNull { !it.isBoss } ?: enemies.firstOrNull()
 
         if (targetEnemy == null) {
-            // No enemies - clear solution boxes
+            // No enemies - DISABLE solution boxes instead of showing zeros
             currentSolutionBoxes = listOf()
             targetEnemyId = -1
             selectedSolutionIndex = -1
@@ -222,7 +248,8 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             hasPendingSelection = false
 
             Handler(Looper.getMainLooper()).post {
-                (context as MainActivity).updateSolutionBoxes(listOf(0, 0, 0)) // Placeholder
+                // Pass empty list to disable boxes
+                (context as MainActivity).updateSolutionBoxes(listOf())
                 (context as MainActivity).updateSolutionBoxSelection(-1)
             }
             return
@@ -296,16 +323,30 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
     fun fire() {
         when (gameState) {
             GameState.PLAYING -> {
-                // FIXED: Check hasValidSelection instead of selectedAnswer != 0
+                if (enemies.isEmpty()) {
+                    println("❌ Cannot fire: No enemies present")
+                    return
+                }
+
+                // If auto-solve is active, always fire with correct answer
+                if (gameEngine.isPowerUpActive(PowerUpType.AUTO_SOLVE)) {
+                    val targetEnemy = enemies.firstOrNull { !it.isBoss } ?: enemies.firstOrNull()
+                    if (targetEnemy != null) {
+                        bullets.add(Bullet(playerX, playerY - 30f, targetEnemy.answer))
+                        println("🤖 MANUAL AUTO-SOLVE: Firing with correct answer ${targetEnemy.answer}")
+                    }
+                    return
+                }
+
+                // Normal firing logic
                 if (hasValidSelection && selectedSolutionIndex >= 0) {
                     println("🔥 FIRING with answer: $selectedAnswer")
                     bullets.add(Bullet(playerX, playerY - 30f, selectedAnswer))
                 } else {
-                    println("❌ Cannot fire: No valid selection (hasValidSelection=$hasValidSelection, selectedIndex=$selectedSolutionIndex)")
+                    println("❌ Cannot fire: No valid selection")
                 }
             }
             GameState.GAME_OVER -> {
-                // Restart the game
                 initializeGame()
             }
             else -> {}
@@ -414,8 +455,21 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             playerX = playerX.coerceIn(50f, width - 50f)
         }
 
-        // Spawn enemies
-        if (currentTime - lastEnemySpawn > enemySpawnDelay && enemies.size < 5) {
+        // AUTO-SOLVE: Automatically fire at enemies when power-up is active
+        if (gameEngine.isPowerUpActive(PowerUpType.AUTO_SOLVE) &&
+            enemies.isNotEmpty() &&
+            bullets.isEmpty()) { // Only fire if no bullets currently active
+            handleAutoSolve()
+        }
+
+        // Spawn enemies with improved timing
+        val dynamicSpawnDelay = when {
+            wave == 1 && enemies.isEmpty() -> 500L
+            wave <= 3 -> max(1500L, enemySpawnDelay)
+            else -> enemySpawnDelay
+        }
+
+        if (currentTime - lastEnemySpawn > dynamicSpawnDelay && enemies.size < 5) {
             spawnEnemy()
             lastEnemySpawn = currentTime
         }
@@ -428,9 +482,16 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             enemy.y += enemy.speed * speedMultiplier
             if (enemy.y > height) {
                 if (!gameEngine.isPowerUpActive(PowerUpType.SHIELD)) {
-                    lives--
-                    combo = 0
-                    comboMultiplier = 1.0f
+                    // FIXED: Check for extra life before losing a life
+                    if (gameEngine.consumeExtraLife()) {
+                        println("💚 Extra life consumed! Lives saved!")
+                        // Show visual effect for extra life consumption
+                        gameEngine.addExplosion(playerX, playerY, ExplosionType.CORRECT)
+                    } else {
+                        lives--
+                        combo = 0
+                        comboMultiplier = 1.0f
+                    }
                 } else {
                     gameEngine.consumeShield()
                 }
@@ -493,9 +554,29 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         updateUI()
     }
 
+    // Add this new method to handle auto-solve firing
+    private fun handleAutoSolve() {
+        if (!gameEngine.isPowerUpActive(PowerUpType.AUTO_SOLVE)) return
+
+        // Find the first enemy (prioritize non-boss enemies)
+        val targetEnemy = enemies.firstOrNull { !it.isBoss } ?: enemies.firstOrNull()
+
+        if (targetEnemy != null) {
+            // Auto-fire with the correct answer
+            val correctAnswer = targetEnemy.answer
+            bullets.add(Bullet(playerX, playerY - 30f, correctAnswer))
+
+            // Mark that we used auto-solve
+            println("🤖 AUTO-SOLVE: Firing with correct answer $correctAnswer for ${targetEnemy.equation}")
+
+            // Optional: Add visual effect to show it's auto-solve
+            gameEngine.addExplosion(playerX, playerY - 30f, ExplosionType.NORMAL)
+        }
+    }
+
     private fun spawnEnemy() {
-        // Check if it's time for a boss wave
-        if (wave % 5 == 0 && !isBossWave && enemies.isEmpty()) {
+        // Check if it's time for a boss wave (skip boss waves in practice mode)
+        if (gameMode != GameMode.PRACTICE && wave % 5 == 0 && !isBossWave && enemies.isEmpty()) {
             bossEnemy = gameEngine.initializeBoss(wave)
             bossEnemy?.let {
                 it.isBoss = true
@@ -504,9 +585,8 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             }
             isBossWave = true
 
-            // Only generate new solution boxes if no pending selection
             if (!hasPendingSelection) {
-                targetEnemyId = -1  // Reset for boss
+                targetEnemyId = -1
                 generateNewSolutionBoxes()
             }
             return
@@ -514,28 +594,39 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
 
         if (isBossWave) return
 
-        val currentDifficulty = getDifficultyFromKills()
-        val equation = gameEngine.generateEquationForDifficulty(currentDifficulty)
+        // Generate equation based on game mode
+        val equation = when (gameMode) {
+            GameMode.PRACTICE -> {
+                // For practice mode, use the specific practice equation generation
+                gameEngine.generatePracticeEquation()
+            }
+            else -> {
+                // For normal mode, use difficulty-based generation
+                val currentDifficulty = getDifficultyFromKills()
+                gameEngine.generateEquationForDifficulty(currentDifficulty)
+            }
+        }
 
         val enemy = Enemy(
             x = Random.nextFloat() * (width - 100f) + 50f,
             y = 50f,
             equation = equation.first,
             answer = equation.second,
-            speed = 0.8f + (currentDifficulty * 0.15f),
+            speed = if (gameMode == GameMode.PRACTICE) 1.0f else 0.8f + (getDifficultyFromKills() * 0.15f),
             id = nextEnemyId++
         )
         enemies.add(enemy)
 
-        println("👾 Spawned enemy ${enemy.id}: ${enemy.equation} = ${enemy.answer}")
+        println("👾 Spawned ${gameMode.name} enemy ${enemy.id}: ${enemy.equation} = ${enemy.answer}")
 
         // Only generate new solution boxes for the FIRST enemy when no selection is pending
         if (enemies.size == 1 && !hasPendingSelection) {
             generateNewSolutionBoxes()
         }
 
-        // Occasionally spawn power-ups
-        if (Random.nextFloat() < 0.15f) {
+        // Occasionally spawn power-ups (less frequent in practice mode)
+        val powerUpChance = if (gameMode == GameMode.PRACTICE) 0.05f else 0.15f
+        if (Random.nextFloat() < powerUpChance) {
             spawnPowerUp()
         }
     }
@@ -578,8 +669,38 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         // Player-PowerUp collisions
         powerUps.forEach { powerUp ->
             if (abs(playerX - powerUp.x) < 50 && abs(playerY - powerUp.y) < 50) {
-                gameEngine.activatePowerUp(powerUp.type)
-                powerUpsToRemove.add(powerUp)
+                // FIXED: Handle power-up activation properly
+                try {
+                    gameEngine.activatePowerUp(powerUp.type)
+                    powerUpsToRemove.add(powerUp)
+
+                    // Handle specific power-up effects
+                    when (powerUp.type) {
+                        PowerUpType.AUTO_SOLVE -> {
+                            println("🤖 AUTO-SOLVE activated! ${gameEngine.getActivePowerUpCount(PowerUpType.AUTO_SOLVE)} uses remaining")
+                        }
+                        PowerUpType.EXTRA_LIFE -> {
+                            lives++
+                            println("💚 EXTRA LIFE activated! Lives: $lives")
+                            gameEngine.addExplosion(playerX, playerY, ExplosionType.CORRECT)
+                        }
+                        PowerUpType.SHIELD -> {
+                            println("🛡️ SHIELD activated!")
+                        }
+                        PowerUpType.TIME_FREEZE -> {
+                            println("⏰ TIME FREEZE activated!")
+                        }
+                        PowerUpType.DOUBLE_POINTS -> {
+                            println("💰 DOUBLE POINTS activated!")
+                        }
+                    }
+                } catch (e: Exception) {
+                    // FIXED: Catch any power-up related crashes
+                    println("❌ Error activating power-up: ${e.message}")
+                    e.printStackTrace()
+                    // Still remove the power-up to prevent repeated crashes
+                    powerUpsToRemove.add(powerUp)
+                }
             }
         }
 
@@ -587,7 +708,7 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         enemies.removeAll(enemiesToRemove)
         powerUps.removeAll(powerUpsToRemove)
 
-        // IMPORTANT: After removing enemies, check if we need new solution boxes
+        // After removing enemies, check if we need new solution boxes
         if (enemiesToRemove.isNotEmpty()) {
             val wasTargetDestroyed = enemiesToRemove.any { it.id == targetEnemyId }
             if (wasTargetDestroyed) {
@@ -712,12 +833,23 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
     }
 
     private fun spawnPowerUp() {
+        // FIXED: Only spawn valid power-up types that are properly handled
+        val availablePowerUps = listOf(
+            PowerUpType.TIME_FREEZE,
+            PowerUpType.AUTO_SOLVE,
+            PowerUpType.SHIELD,
+            PowerUpType.DOUBLE_POINTS,
+            PowerUpType.EXTRA_LIFE
+        )
+
         val powerUp = PowerUp(
             x = Random.nextFloat() * (width - 50f) + 25f,
             y = 50f,
-            type = PowerUpType.values().random()
+            type = availablePowerUps.random()
         )
         powerUps.add(powerUp)
+
+        println("🎁 Spawned power-up: ${powerUp.type}")
     }
 
     private fun completeWave() {
@@ -739,9 +871,30 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             if (::scoreText.isInitialized) {
                 scoreText.text = "Score: $score"
                 livesText.text = "Lives: $lives"
-                waveText.text = "Wave: $wave"
+                waveText.text = if (gameMode == GameMode.PRACTICE) "Practice" else "Wave: $wave"
                 comboText.text = "Combo: ${combo}x"
-                difficultyText.text = "Level: $currentDifficultyLevel"
+                difficultyText.text = if (gameMode == GameMode.PRACTICE) {
+                    val practiceType = sharedPreferences.getInt("practice_type", 0)
+                    val practiceLevel = sharedPreferences.getInt("practice_difficulty", 1)
+                    val operationName = when (practiceType) {
+                        0 -> "Add"
+                        1 -> "Sub"
+                        2 -> "Mul"
+                        3 -> "Div"
+                        4 -> "Mix"
+                        else -> "Math"
+                    }
+                    val levelName = when (practiceLevel) {
+                        1 -> "Easy"
+                        2 -> "Med"
+                        3 -> "Hard"
+                        4 -> "Expert"
+                        else -> "L$practiceLevel"
+                    }
+                    "$operationName-$levelName"
+                } else {
+                    "Level: $currentDifficultyLevel"
+                }
             }
         }
     }
@@ -795,7 +948,15 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         // Draw bullets
         bullets.forEach { bullet ->
             val bulletSize = 8f
-            canvas.drawCircle(bullet.x, bullet.y, bulletSize, bulletPaint)
+            // Special color for auto-solve bullets
+            val bulletColor = if (gameEngine.isPowerUpActive(PowerUpType.AUTO_SOLVE)) {
+                Paint().apply {
+                    color = Color.GREEN
+                    style = Paint.Style.FILL
+                }
+            } else bulletPaint
+
+            canvas.drawCircle(bullet.x, bullet.y, bulletSize, bulletColor)
 
             canvas.drawText(
                 bullet.value.toString(),
@@ -805,30 +966,43 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             )
         }
 
-        // Draw power-ups
+        // FIXED: Draw power-ups with proper error handling
         powerUps.forEach { powerUp ->
-            val powerUpPaint = Paint().apply {
-                color = when (powerUp.type) {
-                    PowerUpType.TIME_FREEZE -> Color.BLUE
-                    PowerUpType.AUTO_SOLVE -> Color.GREEN
-                    PowerUpType.SHIELD -> Color.MAGENTA
-                    PowerUpType.DOUBLE_POINTS -> Color.YELLOW
-                    else -> Color.CYAN
+            try {
+                val powerUpPaint = Paint().apply {
+                    color = when (powerUp.type) {
+                        PowerUpType.TIME_FREEZE -> Color.BLUE
+                        PowerUpType.AUTO_SOLVE -> Color.GREEN
+                        PowerUpType.SHIELD -> Color.MAGENTA
+                        PowerUpType.DOUBLE_POINTS -> Color.YELLOW
+                        PowerUpType.EXTRA_LIFE -> Color.RED
+                    }
+                    style = Paint.Style.FILL
                 }
-                style = Paint.Style.FILL
+
+                canvas.drawCircle(powerUp.x, powerUp.y, 20f, powerUpPaint)
+
+                val symbol = when (powerUp.type) {
+                    PowerUpType.TIME_FREEZE -> "⏰"
+                    PowerUpType.AUTO_SOLVE -> "🤖"
+                    PowerUpType.SHIELD -> "🛡️"
+                    PowerUpType.DOUBLE_POINTS -> "2X"
+                    PowerUpType.EXTRA_LIFE -> "💚"
+                }
+
+                val symbolPaint = Paint().apply {
+                    color = Color.WHITE
+                    textSize = 16f
+                    textAlign = Paint.Align.CENTER
+                    isAntiAlias = true
+                    typeface = Typeface.DEFAULT_BOLD
+                }
+
+                canvas.drawText(symbol, powerUp.x, powerUp.y + 5f, symbolPaint)
+            } catch (e: Exception) {
+                // FIXED: If drawing power-up fails, just skip it to prevent crashes
+                println("❌ Error drawing power-up: ${e.message}")
             }
-
-            canvas.drawCircle(powerUp.x, powerUp.y, 20f, powerUpPaint)
-
-            val symbol = when (powerUp.type) {
-                PowerUpType.TIME_FREEZE -> "⏰"
-                PowerUpType.AUTO_SOLVE -> "🤖"
-                PowerUpType.SHIELD -> "🛡️"
-                PowerUpType.DOUBLE_POINTS -> "2X"
-                else -> "?"
-            }
-
-            canvas.drawText(symbol, powerUp.x, powerUp.y + 5f, equationPaint)
         }
 
         gameEngine.drawEffects(canvas)
@@ -863,6 +1037,40 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             )
         }
 
+        // Practice mode specific UI
+        if (gameMode == GameMode.PRACTICE) {
+            val practiceInfoPaint = Paint().apply {
+                color = Color.parseColor("#4CAF50") // Green for practice
+                textSize = 20f
+                textAlign = Paint.Align.CENTER
+                isAntiAlias = true
+                typeface = Typeface.DEFAULT_BOLD
+                setShadowLayer(2f, 0f, 0f, Color.BLACK)
+            }
+
+            val practiceType = sharedPreferences.getInt("practice_type", 0)
+            val practiceLevel = sharedPreferences.getInt("practice_difficulty", 1)
+
+            val operationName = when (practiceType) {
+                0 -> "Addition Practice"
+                1 -> "Subtraction Practice"
+                2 -> "Multiplication Practice"
+                3 -> "Division Practice"
+                4 -> "Mixed Operations Practice"
+                else -> "Math Practice"
+            }
+
+            val levelName = when (practiceLevel) {
+                1 -> "Easy Level"
+                2 -> "Medium Level"
+                3 -> "Hard Level"
+                4 -> "Expert Level"
+                else -> "Level $practiceLevel"
+            }
+
+            canvas.drawText("$operationName - $levelName", width / 2f, 50f, practiceInfoPaint)
+        }
+
         // Debug info for target enemy and selection state
         val targetEnemy = enemies.firstOrNull { it.id == targetEnemyId }
         if (targetEnemy != null) {
@@ -880,7 +1088,7 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             )
         }
 
-        // Draw power-up status
+        // Enhanced power-up status display
         var statusY = 100f
         if (gameEngine.isPowerUpActive(PowerUpType.TIME_FREEZE)) {
             canvas.drawText("TIME FREEZE ACTIVE", width / 2f, statusY, textPaint)
@@ -894,9 +1102,28 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             canvas.drawText("SHIELD ACTIVE", width / 2f, statusY, textPaint)
             statusY += 40f
         }
+
+        // Enhanced auto-solve display
         val autoSolveCount = gameEngine.getActivePowerUpCount(PowerUpType.AUTO_SOLVE)
         if (autoSolveCount > 0) {
-            canvas.drawText("AUTO-SOLVE: $autoSolveCount", width / 2f, statusY, textPaint)
+            val autoSolvePaint = Paint().apply {
+                color = Color.GREEN
+                textSize = 32f
+                textAlign = Paint.Align.CENTER
+                isAntiAlias = true
+                typeface = Typeface.DEFAULT_BOLD
+            }
+            canvas.drawText("🤖 AUTO-SOLVE: $autoSolveCount", width / 2f, statusY, autoSolvePaint)
+            statusY += 50f
+
+            // Show instruction
+            val instructionPaint = Paint().apply {
+                color = Color.YELLOW
+                textSize = 20f
+                textAlign = Paint.Align.CENTER
+                isAntiAlias = true
+            }
+            canvas.drawText("Automatic targeting active!", width / 2f, statusY, instructionPaint)
         }
 
         // Draw difficulty upgrade notification

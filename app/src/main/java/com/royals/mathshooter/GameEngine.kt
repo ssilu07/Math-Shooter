@@ -84,6 +84,7 @@ class GameEngine(private val context: Context) {
         // 0: Addition, 1: Subtraction, 2: Multiplication, 3: Division, 4: Mixed
     }
 
+    // Updated main equation generation method
     fun generateEquation(wave: Int): Pair<String, Int> {
         return when (gameMode) {
             GameMode.DAILY_CHALLENGE -> {
@@ -93,7 +94,7 @@ class GameEngine(private val context: Context) {
                     generateStandardEquation(wave)
                 }
             }
-            GameMode.PRACTICE -> generatePracticeEquation()
+            GameMode.PRACTICE -> generatePracticeEquation() // Use practice-specific generation
             else -> generateStandardEquation(wave)
         }
     }
@@ -115,16 +116,17 @@ class GameEngine(private val context: Context) {
         return generateEquationForDifficulty(min(adjustedWave, 10))
     }
 
-    private fun generatePracticeEquation(): Pair<String, Int> {
+    fun generatePracticeEquation(): Pair<String, Int> {
         val practiceType = sharedPreferences.getInt("practice_type", 0)
         val difficulty = sharedPreferences.getInt("practice_difficulty", 1)
 
         return when (practiceType) {
-            0 -> generateAdditionEquation(difficulty)
-            1 -> generateSubtractionEquation(difficulty)
-            2 -> generateMultiplicationEquation(difficulty)
-            3 -> generateDivisionEquation(difficulty)
-            else -> generateEquationForDifficulty(difficulty)
+            0 -> generateAdditionEquation(difficulty)      // Addition
+            1 -> generateSubtractionEquation(difficulty)   // Subtraction
+            2 -> generateMultiplicationEquation(difficulty) // Multiplication
+            3 -> generateDivisionEquation(difficulty)      // Division
+            4 -> generateMixedEquation(difficulty)         // Mixed Operations
+            else -> generateAdditionEquation(difficulty)   // Default to addition
         }
     }
 
@@ -337,86 +339,145 @@ class GameEngine(private val context: Context) {
         }
     }
 
+    // Enhanced Addition Equations with proper difficulty levels
     private fun generateAdditionEquation(difficulty: Int): Pair<String, Int> {
         return when (difficulty) {
-            1 -> {
-                val a = Random.nextInt(1, 20)
-                val b = Random.nextInt(1, 20)
+            1 -> { // Easy - 2 digit numbers
+                val a = Random.nextInt(10, 99)  // 10-99
+                val b = Random.nextInt(10, 99)  // 10-99
                 Pair("$a + $b", a + b)
             }
-            2 -> {
-                val a = Random.nextInt(10, 100)
-                val b = Random.nextInt(10, 100)
+            2 -> { // Medium - 3 digit numbers
+                val a = Random.nextInt(100, 999)  // 100-999
+                val b = Random.nextInt(100, 999)  // 100-999
                 Pair("$a + $b", a + b)
             }
-            else -> {
-                val a = Random.nextInt(100, 1000)
-                val b = Random.nextInt(100, 1000)
+            3 -> { // Hard - 4 digit numbers
+                val a = Random.nextInt(1000, 9999)  // 1000-9999
+                val b = Random.nextInt(1000, 9999)  // 1000-9999
+                Pair("$a + $b", a + b)
+            }
+            4 -> { // Expert - 5 digit numbers
+                val a = Random.nextInt(10000, 99999)  // 10000-99999
+                val b = Random.nextInt(10000, 99999)  // 10000-99999
+                Pair("$a + $b", a + b)
+            }
+            else -> { // Default to easy
+                val a = Random.nextInt(10, 99)
+                val b = Random.nextInt(10, 99)
                 Pair("$a + $b", a + b)
             }
         }
     }
 
+    // Enhanced Subtraction Equations with proper difficulty levels
     private fun generateSubtractionEquation(difficulty: Int): Pair<String, Int> {
         return when (difficulty) {
-            1 -> {
-                val a = Random.nextInt(10, 30)
-                val b = Random.nextInt(1, a)
+            1 -> { // Easy - 2 digit numbers
+                val a = Random.nextInt(20, 99)  // Larger number
+                val b = Random.nextInt(10, a)   // Smaller number to ensure positive result
                 Pair("$a - $b", a - b)
             }
-            2 -> {
-                val a = Random.nextInt(50, 200)
+            2 -> { // Medium - 3 digit numbers
+                val a = Random.nextInt(200, 999)
+                val b = Random.nextInt(100, a)
+                Pair("$a - $b", a - b)
+            }
+            3 -> { // Hard - 4 digit numbers
+                val a = Random.nextInt(2000, 9999)
+                val b = Random.nextInt(1000, a)
+                Pair("$a - $b", a - b)
+            }
+            4 -> { // Expert - 5 digit numbers
+                val a = Random.nextInt(20000, 99999)
+                val b = Random.nextInt(10000, a)
+                Pair("$a - $b", a - b)
+            }
+            else -> {
+                val a = Random.nextInt(20, 99)
                 val b = Random.nextInt(10, a)
                 Pair("$a - $b", a - b)
             }
-            else -> {
-                val a = Random.nextInt(200, 1000)
-                val b = Random.nextInt(50, a)
-                Pair("$a - $b", a - b)
-            }
         }
     }
 
+    // Enhanced Multiplication Equations with proper difficulty levels
     private fun generateMultiplicationEquation(difficulty: Int): Pair<String, Int> {
         return when (difficulty) {
-            1 -> {
-                val a = Random.nextInt(2, 12)
-                val b = Random.nextInt(2, 12)
+            1 -> { // Easy - Single digit × 2 digit
+                val a = Random.nextInt(2, 9)     // 2-9
+                val b = Random.nextInt(10, 99)   // 10-99
                 Pair("$a × $b", a * b)
             }
-            2 -> {
-                val a = Random.nextInt(10, 25)
-                val b = Random.nextInt(2, 15)
+            2 -> { // Medium - 2 digit × 2 digit
+                val a = Random.nextInt(10, 99)   // 10-99
+                val b = Random.nextInt(10, 99)   // 10-99
+                Pair("$a × $b", a * b)
+            }
+            3 -> { // Hard - 2 digit × 3 digit
+                val a = Random.nextInt(10, 99)   // 10-99
+                val b = Random.nextInt(100, 999) // 100-999
+                Pair("$a × $b", a * b)
+            }
+            4 -> { // Expert - 3 digit × 3 digit
+                val a = Random.nextInt(100, 999) // 100-999
+                val b = Random.nextInt(100, 999) // 100-999
                 Pair("$a × $b", a * b)
             }
             else -> {
-                val a = Random.nextInt(15, 50)
-                val b = Random.nextInt(10, 30)
+                val a = Random.nextInt(2, 9)
+                val b = Random.nextInt(10, 99)
                 Pair("$a × $b", a * b)
             }
         }
     }
 
+    // Enhanced Division Equations with proper difficulty levels
     private fun generateDivisionEquation(difficulty: Int): Pair<String, Int> {
         return when (difficulty) {
-            1 -> {
-                val divisor = Random.nextInt(2, 12)
-                val quotient = Random.nextInt(2, 12)
+            1 -> { // Easy - 2 digit ÷ 1 digit
+                val divisor = Random.nextInt(2, 9)          // 2-9
+                val quotient = Random.nextInt(10, 99)       // 10-99
                 val dividend = divisor * quotient
                 Pair("$dividend ÷ $divisor", quotient)
             }
-            2 -> {
-                val divisor = Random.nextInt(5, 20)
-                val quotient = Random.nextInt(5, 25)
+            2 -> { // Medium - 3 digit ÷ 1 digit
+                val divisor = Random.nextInt(2, 9)          // 2-9
+                val quotient = Random.nextInt(100, 999)     // 100-999
+                val dividend = divisor * quotient
+                Pair("$dividend ÷ $divisor", quotient)
+            }
+            3 -> { // Hard - 3 digit ÷ 2 digit
+                val divisor = Random.nextInt(10, 99)        // 10-99
+                val quotient = Random.nextInt(10, 99)       // 10-99
+                val dividend = divisor * quotient
+                Pair("$dividend ÷ $divisor", quotient)
+            }
+            4 -> { // Expert - 4 digit ÷ 2 digit
+                val divisor = Random.nextInt(10, 99)        // 10-99
+                val quotient = Random.nextInt(100, 999)     // 100-999
                 val dividend = divisor * quotient
                 Pair("$dividend ÷ $divisor", quotient)
             }
             else -> {
-                val divisor = Random.nextInt(10, 50)
-                val quotient = Random.nextInt(10, 40)
+                val divisor = Random.nextInt(2, 9)
+                val quotient = Random.nextInt(10, 99)
                 val dividend = divisor * quotient
                 Pair("$dividend ÷ $divisor", quotient)
             }
+        }
+    }
+
+    // Mixed Operations based on difficulty
+    private fun generateMixedEquation(difficulty: Int): Pair<String, Int> {
+        val operationType = Random.nextInt(0, 4) // 0=+, 1=-, 2=×, 3=÷
+
+        return when (operationType) {
+            0 -> generateAdditionEquation(difficulty)
+            1 -> generateSubtractionEquation(difficulty)
+            2 -> generateMultiplicationEquation(difficulty)
+            3 -> generateDivisionEquation(difficulty)
+            else -> generateAdditionEquation(difficulty)
         }
     }
 
@@ -640,8 +701,11 @@ class GameEngine(private val context: Context) {
             PowerUpType.DOUBLE_POINTS -> {
                 activePowerUps[type] = PowerUpEffect(currentTime + 10000, null)
             }
-
-            PowerUpType.EXTRA_LIFE -> TODO()
+            PowerUpType.EXTRA_LIFE -> {
+                // FIXED: Handle EXTRA_LIFE power-up properly
+                // This should add an extra life to the player
+                activePowerUps[type] = PowerUpEffect(currentTime + 1000, 1) // Short duration, immediate effect
+            }
         }
     }
 
@@ -651,6 +715,7 @@ class GameEngine(private val context: Context) {
 
         return when (type) {
             PowerUpType.AUTO_SOLVE -> (effect.data as? Int ?: 0) > 0
+            PowerUpType.EXTRA_LIFE -> false // EXTRA_LIFE is consumed immediately, never "active"
             else -> currentTime < effect.endTime
         }
     }
@@ -678,6 +743,16 @@ class GameEngine(private val context: Context) {
         return false
     }
 
+    // FIXED: Add method to consume extra life and return if successful
+    fun consumeExtraLife(): Boolean {
+        val effect = activePowerUps[PowerUpType.EXTRA_LIFE]
+        if (effect != null) {
+            activePowerUps.remove(PowerUpType.EXTRA_LIFE)
+            return true
+        }
+        return false
+    }
+
     fun updatePowerUps() {
         val currentTime = System.currentTimeMillis()
         val expiredPowerUps = mutableListOf<PowerUpType>()
@@ -695,6 +770,7 @@ class GameEngine(private val context: Context) {
         return when (type) {
             PowerUpType.AUTO_SOLVE -> activePowerUps[type]?.data as? Int ?: 0
             PowerUpType.SHIELD -> if (isPowerUpActive(type)) 1 else 0
+            PowerUpType.EXTRA_LIFE -> if (activePowerUps.containsKey(type)) 1 else 0
             else -> if (isPowerUpActive(type)) 1 else 0
         }
     }

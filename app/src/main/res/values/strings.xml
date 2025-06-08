@@ -75,12 +75,12 @@
     <string name="adaptive_difficulty">Adaptive Difficulty</string>
     <string name="adaptive_difficulty_desc">Adjust difficulty based on performance</string>
     <string name="starting_difficulty">Starting Difficulty</string>
-    <string-array name="difficulty_options">
+  <!--  <string-array name="difficulty_options">
         <item>Easy</item>
         <item>Medium</item>
         <item>Hard</item>
         <item>Expert</item>
-    </string-array>
+    </string-array>-->
 
     <!-- Visual Settings -->
     <string name="colorblind_mode">Colorblind Mode</string>
@@ -111,13 +111,13 @@
     <string name="practice_title">PRACTICE MODE</string>
     <string name="practice_subtitle">Focus on specific math operations</string>
     <string name="operation_type">Operation Type</string>
-    <string-array name="operation_options">
+   <!-- <string-array name="operation_options">
         <item>Addition</item>
         <item>Subtraction</item>
         <item>Multiplication</item>
         <item>Division</item>
         <item>Mixed Operations</item>
-    </string-array>
+    </string-array>-->
     <string name="practice_difficulty">Practice Difficulty</string>
     <string name="start_practice">START PRACTICE</string>
 
@@ -192,4 +192,59 @@
     <!-- Time formatting -->
     <string name="time_minutes_seconds">%d:%02d</string>
     <string name="time_hours_minutes_seconds">%d:%02d:%02d</string>
+
+
+    <!-- Practice Mode Operations -->
+    <string name="practice_addition">Addition (+)</string>
+    <string name="practice_subtraction">Subtraction (−)</string>
+    <string name="practice_multiplication">Multiplication (×)</string>
+    <string name="practice_division">Division (÷)</string>
+    <string name="practice_mixed">Mixed Operations</string>
+
+    <!-- Practice Mode Difficulty Levels -->
+    <string name="difficulty_easy">Easy</string>
+    <string name="difficulty_medium">Medium</string>
+    <string name="difficulty_hard">Hard</string>
+    <string name="difficulty_expert">Expert</string>
+
+    <!-- Practice Mode Descriptions -->
+    <string name="addition_easy_desc">2-digit addition (10-99)</string>
+    <string name="addition_medium_desc">3-digit addition (100-999)</string>
+    <string name="addition_hard_desc">4-digit addition (1000-9999)</string>
+    <string name="addition_expert_desc">5-digit addition (10000-99999)</string>
+
+    <string name="subtraction_easy_desc">2-digit subtraction</string>
+    <string name="subtraction_medium_desc">3-digit subtraction</string>
+    <string name="subtraction_hard_desc">4-digit subtraction</string>
+    <string name="subtraction_expert_desc">5-digit subtraction</string>
+
+    <string name="multiplication_easy_desc">1-digit × 2-digit</string>
+    <string name="multiplication_medium_desc">2-digit × 2-digit</string>
+    <string name="multiplication_hard_desc">2-digit × 3-digit</string>
+    <string name="multiplication_expert_desc">3-digit × 3-digit</string>
+
+    <string name="division_easy_desc">2-digit ÷ 1-digit</string>
+    <string name="division_medium_desc">3-digit ÷ 1-digit</string>
+    <string name="division_hard_desc">3-digit ÷ 2-digit</string>
+    <string name="division_expert_desc">4-digit ÷ 2-digit</string>
+
+    <!-- Array Resources -->
+    <string-array name="operation_options">
+        <item>@string/practice_addition</item>
+        <item>@string/practice_subtraction</item>
+        <item>@string/practice_multiplication</item>
+        <item>@string/practice_division</item>
+        <item>@string/practice_mixed</item>
+    </string-array>
+
+    <string-array name="difficulty_options">
+        <item>@string/difficulty_easy</item>
+        <item>@string/difficulty_medium</item>
+        <item>@string/difficulty_hard</item>
+        <item>@string/difficulty_expert</item>
+    </string-array>
+
+    <!-- Practice Mode Titles -->
+    <string name="choose_operation">Choose Practice Type</string>
+    <string name="choose_difficulty">Choose Difficulty Level</string>
 </resources>
