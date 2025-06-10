@@ -73,6 +73,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pauseButton: Button
     private lateinit var solutionBoxesLayout: LinearLayout
 
+    // Add sound manager
+    private lateinit var soundManager: SoundManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -133,6 +136,19 @@ class MainActivity : AppCompatActivity() {
                 .setPositiveButton("OK") { _, _ -> finish() }
                 .setCancelable(false)
                 .show()
+        }
+
+        // Initialize sound manager
+        soundManager = SoundManager(this)
+        // Pass sound manager to game view
+        gameView.setSoundManager(soundManager)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Release sound resources
+        if (::soundManager.isInitialized) {
+            soundManager.release()
         }
     }
 
@@ -557,10 +573,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun showExitDialog() {
         try {
-            AlertDialog.Builder(this)
+            val dialog = AlertDialog.Builder(this)
                 .setTitle("Exit Game?")
                 .setMessage("Do you want to return to the main menu?\n\nYour progress will be lost.")
-                .setIcon(android.R.drawable.ic_dialog_alert)
                 .setPositiveButton("YES") { _, _ ->
                     // Return to main menu
                     finish()
@@ -578,22 +593,43 @@ class MainActivity : AppCompatActivity() {
                 }
                 .setCancelable(false) // Prevent dismissing by tapping outside
                 .create()
-                .apply {
-                    // Style the dialog buttons
-                    setOnShowListener {
-                        getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
-                            setTextColor(Color.parseColor("#FF5722")) // Red color for YES
-                            textSize = 16f
-                            typeface = Typeface.DEFAULT_BOLD
-                        }
-                        getButton(AlertDialog.BUTTON_NEGATIVE)?.apply {
-                            setTextColor(Color.parseColor("#4CAF50")) // Green color for NO
-                            textSize = 16f
-                            typeface = Typeface.DEFAULT_BOLD
-                        }
+
+            // Style the dialog to make title and message visible
+            dialog.setOnShowListener {
+                // Style title
+                val titleId = resources.getIdentifier("alertTitle", "id", "android")
+                if (titleId > 0) {
+                    dialog.findViewById<TextView>(titleId)?.apply {
+                        setTextColor(Color.BLACK)
+                        textSize = 20f
+                        typeface = Typeface.DEFAULT_BOLD
+                        gravity = android.view.Gravity.CENTER
                     }
-                    show()
                 }
+
+                // Style message
+                val messageId = android.R.id.message
+                dialog.findViewById<TextView>(messageId)?.apply {
+                    setTextColor(Color.DKGRAY)
+                    textSize = 16f
+                    gravity = android.view.Gravity.CENTER
+                    setPadding(20, 20, 20, 40)
+                }
+
+                // Style buttons
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
+                    setTextColor(Color.parseColor("#FF5722")) // Red color for YES
+                    textSize = 16f
+                    typeface = Typeface.DEFAULT_BOLD
+                }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.apply {
+                    setTextColor(Color.parseColor("#4CAF50")) // Green color for NO
+                    textSize = 16f
+                    typeface = Typeface.DEFAULT_BOLD
+                }
+            }
+
+            dialog.show()
         } catch (e: Exception) {
             println("❌ Error showing exit dialog: ${e.message}")
             // Fallback: just exit the activity

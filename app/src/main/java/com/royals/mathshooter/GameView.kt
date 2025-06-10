@@ -152,6 +152,14 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         solutionBoxesLayout = layout
     }
 
+    // Add sound manager
+    private var soundManager: SoundManager? = null
+
+    // Add this method
+    fun setSoundManager(soundManager: SoundManager) {
+        this.soundManager = soundManager
+    }
+
     fun initializeGame() {
         gameState = GameState.PLAYING
         score = 0
@@ -333,6 +341,8 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
                     val targetEnemy = enemies.firstOrNull { !it.isBoss } ?: enemies.firstOrNull()
                     if (targetEnemy != null) {
                         bullets.add(Bullet(playerX, playerY - 30f, targetEnemy.answer))
+                        // PLAY SHOOTING SOUND
+                        soundManager?.playShootSound()
                         println("🤖 MANUAL AUTO-SOLVE: Firing with correct answer ${targetEnemy.answer}")
                     }
                     return
@@ -342,6 +352,8 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
                 if (hasValidSelection && selectedSolutionIndex >= 0) {
                     println("🔥 FIRING with answer: $selectedAnswer")
                     bullets.add(Bullet(playerX, playerY - 30f, selectedAnswer))
+                    // PLAY SHOOTING SOUND
+                    soundManager?.playShootSound()
                 } else {
                     println("❌ Cannot fire: No valid selection")
                 }
@@ -558,22 +570,21 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
     private fun handleAutoSolve() {
         if (!gameEngine.isPowerUpActive(PowerUpType.AUTO_SOLVE)) return
 
-        // Find the first enemy (prioritize non-boss enemies)
         val targetEnemy = enemies.firstOrNull { !it.isBoss } ?: enemies.firstOrNull()
 
         if (targetEnemy != null) {
-            // Auto-fire with the correct answer
             val correctAnswer = targetEnemy.answer
             bullets.add(Bullet(playerX, playerY - 30f, correctAnswer))
 
-            // Mark that we used auto-solve
-            println("🤖 AUTO-SOLVE: Firing with correct answer $correctAnswer for ${targetEnemy.equation}")
+            // PLAY SHOOTING SOUND FOR AUTO-SOLVE
+            soundManager?.playShootSound()
 
-            // Optional: Add visual effect to show it's auto-solve
+            println("🤖 AUTO-SOLVE: Firing with correct answer $correctAnswer for ${targetEnemy.equation}")
             gameEngine.addExplosion(playerX, playerY - 30f, ExplosionType.NORMAL)
         }
     }
 
+    // Update the spawnEnemy() method in GameView.kt
     private fun spawnEnemy() {
         // Check if it's time for a boss wave (skip boss waves in practice mode)
         if (gameMode != GameMode.PRACTICE && wave % 5 == 0 && !isBossWave && enemies.isEmpty()) {
@@ -581,6 +592,11 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             bossEnemy?.let {
                 it.isBoss = true
                 it.id = nextEnemyId++
+
+                // APPLY DYNAMIC SPEED TO BOSS
+                val speedMultiplier = sharedPreferences.getFloat("enemy_speed_multiplier", 1.0f)
+                it.speed = (0.5f + (getDifficultyFromKills() * 0.15f)) * speedMultiplier
+
                 enemies.add(it)
             }
             isBossWave = true
@@ -597,27 +613,38 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         // Generate equation based on game mode
         val equation = when (gameMode) {
             GameMode.PRACTICE -> {
-                // For practice mode, use the specific practice equation generation
                 gameEngine.generatePracticeEquation()
             }
             else -> {
-                // For normal mode, use difficulty-based generation
                 val currentDifficulty = getDifficultyFromKills()
                 gameEngine.generateEquationForDifficulty(currentDifficulty)
             }
         }
+
+        // GET DYNAMIC SPEED MULTIPLIER FROM SETTINGS
+        val speedMultiplier = sharedPreferences.getFloat("enemy_speed_multiplier", 1.0f)
+
+        // CALCULATE BASE SPEED
+        val baseSpeed = if (gameMode == GameMode.PRACTICE) {
+            1.0f
+        } else {
+            0.8f + (getDifficultyFromKills() * 0.15f)
+        }
+
+        // APPLY SPEED MULTIPLIER
+        val finalSpeed = baseSpeed * speedMultiplier
 
         val enemy = Enemy(
             x = Random.nextFloat() * (width - 100f) + 50f,
             y = 50f,
             equation = equation.first,
             answer = equation.second,
-            speed = if (gameMode == GameMode.PRACTICE) 1.0f else 0.8f + (getDifficultyFromKills() * 0.15f),
+            speed = finalSpeed, // Use dynamic speed
             id = nextEnemyId++
         )
         enemies.add(enemy)
 
-        println("👾 Spawned ${gameMode.name} enemy ${enemy.id}: ${enemy.equation} = ${enemy.answer}")
+        println("👾 Spawned ${gameMode.name} enemy ${enemy.id}: ${enemy.equation} = ${enemy.answer} (Speed: ${String.format("%.2f", finalSpeed)})")
 
         // Only generate new solution boxes for the FIRST enemy when no selection is pending
         if (enemies.size == 1 && !hasPendingSelection) {
@@ -636,10 +663,10 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         val enemiesToRemove = mutableListOf<Enemy>()
         val powerUpsToRemove = mutableListOf<PowerUp>()
 
-        // Bullet-Enemy collisions
+        // Enhanced Bullet-Enemy collisions with proper box collision
         bullets.forEach { bullet ->
             enemies.forEach { enemy ->
-                if (abs(bullet.x - enemy.x) < 40 && abs(bullet.y - enemy.y) < 40) {
+                if (isColliding(bullet, enemy)) {
                     val isCorrect = bullet.value == enemy.answer || gameEngine.isPowerUpActive(PowerUpType.AUTO_SOLVE)
 
                     if (isCorrect) {
@@ -666,15 +693,16 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
             }
         }
 
-        // Player-PowerUp collisions
+        // Enhanced Player-PowerUp collisions
         powerUps.forEach { powerUp ->
-            if (abs(playerX - powerUp.x) < 50 && abs(playerY - powerUp.y) < 50) {
-                // FIXED: Handle power-up activation properly
+            if (isCollidingWithPlayer(powerUp)) {
+                // Handle power-up collision (existing code)
                 try {
+                    // PLAY POWER-UP SOUND
+                    soundManager?.playPowerUpSound()
                     gameEngine.activatePowerUp(powerUp.type)
                     powerUpsToRemove.add(powerUp)
 
-                    // Handle specific power-up effects
                     when (powerUp.type) {
                         PowerUpType.AUTO_SOLVE -> {
                             println("🤖 AUTO-SOLVE activated! ${gameEngine.getActivePowerUpCount(PowerUpType.AUTO_SOLVE)} uses remaining")
@@ -695,10 +723,8 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
                         }
                     }
                 } catch (e: Exception) {
-                    // FIXED: Catch any power-up related crashes
                     println("❌ Error activating power-up: ${e.message}")
                     e.printStackTrace()
-                    // Still remove the power-up to prevent repeated crashes
                     powerUpsToRemove.add(powerUp)
                 }
             }
@@ -718,7 +744,92 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
         }
     }
 
+    // New method: Enhanced collision detection for bullet-enemy
+    private fun isColliding(bullet: Bullet, enemy: Enemy): Boolean {
+        // Calculate enemy bounds
+        val enemyWidth = if (enemy.isBoss) 140f else 120f
+        val enemyHeight = if (enemy.isBoss) 80f else 60f
+
+        val enemyLeft = enemy.x - enemyWidth / 2
+        val enemyRight = enemy.x + enemyWidth / 2
+        val enemyTop = enemy.y - enemyHeight / 2
+        val enemyBottom = enemy.y + enemyHeight / 2
+
+        // Bullet dimensions (small circle)
+        val bulletRadius = 8f
+        val bulletLeft = bullet.x - bulletRadius
+        val bulletRight = bullet.x + bulletRadius
+        val bulletTop = bullet.y - bulletRadius
+        val bulletBottom = bullet.y + bulletRadius
+
+        // Check if bullet rectangle overlaps with enemy rectangle
+        return bulletRight >= enemyLeft &&
+                bulletLeft <= enemyRight &&
+                bulletBottom >= enemyTop &&
+                bulletTop <= enemyBottom
+    }
+
+    // New method: Enhanced collision detection for player-powerup
+    private fun isCollidingWithPlayer(powerUp: PowerUp): Boolean {
+        // Player dimensions
+        val playerSize = 30f
+        val playerLeft = playerX - playerSize
+        val playerRight = playerX + playerSize
+        val playerTop = playerY - playerSize
+        val playerBottom = playerY + playerSize
+
+        // Power-up dimensions (circle with radius 20f)
+        val powerUpRadius = 20f
+        val powerUpLeft = powerUp.x - powerUpRadius
+        val powerUpRight = powerUp.x + powerUpRadius
+        val powerUpTop = powerUp.y - powerUpRadius
+        val powerUpBottom = powerUp.y + powerUpRadius
+
+        // Check if power-up circle overlaps with player rectangle
+        return powerUpRight >= playerLeft &&
+                powerUpLeft <= playerRight &&
+                powerUpBottom >= playerTop &&
+                powerUpTop <= playerBottom
+    }
+
+    // Alternative method: Circle-Rectangle collision (more precise)
+    private fun isCircleRectangleColliding(
+        circleX: Float, circleY: Float, circleRadius: Float,
+        rectX: Float, rectY: Float, rectWidth: Float, rectHeight: Float
+    ): Boolean {
+        val rectLeft = rectX - rectWidth / 2
+        val rectRight = rectX + rectWidth / 2
+        val rectTop = rectY - rectHeight / 2
+        val rectBottom = rectY + rectHeight / 2
+
+        // Find the closest point on the rectangle to the circle center
+        val closestX = circleX.coerceIn(rectLeft, rectRight)
+        val closestY = circleY.coerceIn(rectTop, rectBottom)
+
+        // Calculate distance from circle center to closest point
+        val distanceX = circleX - closestX
+        val distanceY = circleY - closestY
+        val distanceSquared = distanceX * distanceX + distanceY * distanceY
+
+        // Check if distance is less than circle radius
+        return distanceSquared <= (circleRadius * circleRadius)
+    }
+
+    // Even more precise collision detection (optional upgrade)
+    private fun isPreciseColliding(bullet: Bullet, enemy: Enemy): Boolean {
+        val enemyWidth = if (enemy.isBoss) 140f else 120f
+        val enemyHeight = if (enemy.isBoss) 80f else 60f
+        val bulletRadius = 8f
+
+        return isCircleRectangleColliding(
+            bullet.x, bullet.y, bulletRadius,
+            enemy.x, enemy.y, enemyWidth, enemyHeight
+        )
+    }
+
     private fun handleCorrectAnswer(enemy: Enemy, bullet: Bullet) {
+        // PLAY HIT SOUND
+        soundManager?.playHitSound()
         // Calculate score
         val basePoints = 10 * wave
         val difficultyBonus = currentDifficultyLevel * 5
@@ -770,6 +881,8 @@ class GameView(context: Context, attrs: AttributeSet? = null) : SurfaceView(cont
     }
 
     private fun handleWrongAnswer() {
+        // PLAY MISS SOUND
+        soundManager?.playMissSound()
         // Wrong answer - DON'T clear selection, DON'T change solution boxes
         combo = 0
         comboMultiplier = 1.0f
