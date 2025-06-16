@@ -1,70 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.royals.mathshooter">
-
+    package="com.royals.mathshooter"> <!-- Target API levels for Play Store -->
+    <uses-sdk
+        android:minSdkVersion="21"
+        android:targetSdkVersion="34" />
     <!-- Permissions -->
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <!-- Features -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- Features -->
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="true" />
 
-    <!-- Target API levels for Play Store -->
-    <uses-sdk
-        android:minSdkVersion="21"
-        android:targetSdkVersion="34" />
-
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@drawable/logo_math_shooter"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@drawable/logo_math_shooter"
         android:theme="@style/Theme.MathShooter"
-        android:hardwareAccelerated="true"
-        android:largeHeap="true"
         tools:targetApi="31">
-
-        <!-- Splash Screen Activity -->
+        <activity
+            android:name=".FormulaListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".LearnActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TableGridActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MathQuizActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MathTableActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MathLearnerActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" /> <!-- Splash Screen Activity -->
         <activity
             android:name=".SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.MathShooter.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Menu Activity -->
+        </activity> <!-- Menu Activity -->
         <activity
             android:name=".MenuActivity"
             android:exported="false"
-            android:theme="@style/Theme.MathShooter" />
-
-        <!-- Main Game Activity -->
+            android:theme="@style/Theme.MathShooter" /> <!-- Main Game Activity -->
         <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
-            android:theme="@style/Theme.MathShooter.NoActionBar"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
-
-        <!-- Settings Activity -->
+            android:theme="@style/Theme.MathShooter.NoActionBar" /> <!-- Settings Activity -->
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.MathShooter"
-            android:parentActivityName=".MenuActivity" />
-
-        <!-- Leaderboard Activity -->
+            android:parentActivityName=".MenuActivity"
+            android:theme="@style/Theme.MathShooter" /> <!-- Leaderboard Activity -->
         <activity
             android:name=".LeaderboardActivity"
             android:exported="false"
-            android:theme="@style/Theme.MathShooter"
-            android:parentActivityName=".MenuActivity" />
-
+            android:parentActivityName=".MenuActivity"
+            android:theme="@style/Theme.MathShooter" />
     </application>
 
 </manifest>

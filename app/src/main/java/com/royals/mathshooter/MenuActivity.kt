@@ -88,6 +88,15 @@ class MenuActivity : AppCompatActivity() {
             showPracticeMenu()
         }
 
+        // NEW: Learn Mathematics button
+        val learnButton = createStyledButton("📚 Learn Mathematics", R.color.game_info) {
+            startLearnSection()
+        }
+
+        val mathLearnerButton = createStyledButton(getString(R.string.math_learner), R.color.game_info) {
+            startMathLearner()
+        }
+
         val dailyChallengeButton = createStyledButton(getString(R.string.daily_challenge), R.color.game_accent) {
             startGame(GameMode.DAILY_CHALLENGE)
         }
@@ -106,11 +115,25 @@ class MenuActivity : AppCompatActivity() {
         mainLayout.addView(highScoreText)
         mainLayout.addView(playButton)
         mainLayout.addView(practiceButton)
+        mainLayout.addView(learnButton)  // ADD THE NEW LEARN BUTTON
+        mainLayout.addView(mathLearnerButton)
         mainLayout.addView(dailyChallengeButton)
         mainLayout.addView(leaderboardButton)
         mainLayout.addView(settingsButton)
 
         setContentView(mainLayout)
+    }
+
+    // NEW: Method to start the Learn section
+    private fun startLearnSection() {
+        val intent = Intent(this, LearnActivity::class.java)
+        startActivity(intent)
+    }
+
+    // Keep existing method for backward compatibility
+    private fun startMathLearner() {
+        val intent = Intent(this, MathLearnerActivity::class.java)
+        startActivity(intent)
     }
 
     private fun createStyledButton(text: String, colorRes: Int, onClick: () -> Unit): Button {

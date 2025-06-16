@@ -75,7 +75,7 @@
     <string name="adaptive_difficulty">Adaptive Difficulty</string>
     <string name="adaptive_difficulty_desc">Adjust difficulty based on performance</string>
     <string name="starting_difficulty">Starting Difficulty</string>
-  <!--  <string-array name="difficulty_options">
+    <!--  <string-array name="difficulty_options">
         <item>Easy</item>
         <item>Medium</item>
         <item>Hard</item>
@@ -111,7 +111,7 @@
     <string name="practice_title">PRACTICE MODE</string>
     <string name="practice_subtitle">Focus on specific math operations</string>
     <string name="operation_type">Operation Type</string>
-   <!-- <string-array name="operation_options">
+    <!-- <string-array name="operation_options">
         <item>Addition</item>
         <item>Subtraction</item>
         <item>Multiplication</item>
@@ -247,4 +247,46 @@
     <!-- Practice Mode Titles -->
     <string name="choose_operation">Choose Practice Type</string>
     <string name="choose_difficulty">Choose Difficulty Level</string>
+
+    <string name="math_learner">📚 Math Learner</string>
+
+    <!-- New Learn Section strings -->
+    <string name="learn_mathematics">📚 Learn Mathematics</string>
+    <string name="learn_section_title">Learn Mathematics</string>
+    <string name="learn_section_subtitle">Master concepts with formulas and examples</string>
+
+    <!-- Formula categories -->
+    <string name="percentage_topic">Percentage</string>
+    <string name="algebra_topic">Algebra</string>
+    <string name="geometry_topic">Geometry</string>
+    <string name="trigonometry_topic">Trigonometry</string>
+    <string name="average_topic">Average</string>
+    <string name="time_distance_topic">Time &amp; Distance</string>
+    <string name="profit_loss_topic">Profit &amp; Loss</string>
+    <string name="simple_interest_topic">Simple Interest</string>
+    <string name="number_system_topic">Number System</string>
+    <string name="statistics_topic">Statistics</string>
+    <string name="probability_topic">Probability</string>
+    <string name="mensuration_topic">Mensuration</string>
+
+    <!-- Formula section labels -->
+    <string name="all_formulas">All</string>
+    <string name="basic_formulas">Basic</string>
+    <string name="advanced_formulas">Advanced</string>
+    <string name="example_formulas">Examples</string>
+
+    <!-- Action buttons -->
+    <string name="copy_formula">Copy</string>
+    <string name="share_formula">Share</string>
+    <string name="bookmark_formula">Bookmark</string>
+    <string name="download_pdf">Download PDF</string>
+    <string name="practice_quiz">Practice Quiz</string>
+
+    <!-- Messages -->
+    <string name="formula_copied">Formula copied to clipboard!</string>
+    <string name="formula_bookmarked">Formula bookmarked!</string>
+    <string name="feature_coming_soon">Feature coming soon!</string>
+    <string name="search_formulas">Search for topics or formulas…</string>
+    <string name="no_search_results">No results found for \'%1$s\'</string>
+    <string name="enter_search_term">Please enter search term</string>
 </resources>

@@ -132,6 +132,38 @@
     <color name="difficulty_expert">#9C27B0</color>
 
     <color name="game_error">#F44336</color>
+
+    <color name="learn_background">#F0F8FF</color>
+    <color name="learn_header">#4CAF50</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_border">#E0E0E0</color>
+    <color name="text_primary">#333333</color>
+    <color name="text_secondary">#666666</color>
+    <color name="text_tertiary">#999999</color>
+
+    <!-- Topic colors -->
+    <color name="percentage_color">#FF5722</color>
+    <color name="algebra_color">#2196F3</color>
+    <color name="geometry_color">#4CAF50</color>
+    <color name="trigonometry_color">#9C27B0</color>
+    <color name="average_color">#FF9800</color>
+    <color name="time_distance_color">#00BCD4</color>
+    <color name="profit_loss_color">#E91E63</color>
+    <color name="simple_interest_color">#795548</color>
+    <color name="number_system_color">#607D8B</color>
+    <color name="statistics_color">#3F51B5</color>
+    <color name="probability_color">#009688</color>
+    <color name="mensuration_color">#CDDC39</color>
+
+    <!-- Formula card colors -->
+    <color name="formula_background">#F8F9FA</color>
+    <color name="formula_border">#E9ECEF</color>
+    <color name="example_background">#FFF9C4</color>
+    <color name="example_border">#FBC02D</color>
+    <color name="basic_badge">#4CAF50</color>
+    <color name="advanced_badge">#FF5722</color>
+    <color name="button_background">#F5F5F5</color>
+    <color name="button_pressed">#E0E0E0</color>
 </resources>
 
 
