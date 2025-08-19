@@ -1,17 +1,14 @@
-package com.royals.mathshooter
+package com.royals.mathshootergame
 
-import android.animation.ObjectAnimator
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import kotlin.random.Random
 
 class MathQuizActivity : AppCompatActivity() {

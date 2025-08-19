@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.royals.mathshooter"> <!-- Target API levels for Play Store -->
+    package="com.royals.mathshootergame"> <!-- Target API levels for Play Store -->
     <uses-sdk
         android:minSdkVersion="21"
         android:targetSdkVersion="34" />
@@ -22,27 +22,27 @@
         android:theme="@style/Theme.MathShooter"
         tools:targetApi="31">
         <activity
-            android:name=".FormulaListActivity"
+            android:name="com.royals.mathshootergame.FormulaListActivity"
             android:exported="false" />
         <activity
-            android:name=".LearnActivity"
+            android:name="com.royals.mathshootergame.LearnActivity"
             android:exported="false" />
         <activity
-            android:name=".TableGridActivity"
+            android:name="com.royals.mathshootergame.TableGridActivity"
             android:exported="false" />
         <activity
-            android:name=".MathQuizActivity"
+            android:name="com.royals.mathshootergame.MathQuizActivity"
             android:exported="false" />
         <activity
-            android:name=".MathTableActivity"
+            android:name="com.royals.mathshootergame.MathTableActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".MathLearnerActivity"
+            android:name="com.royals.mathshootergame.MathLearnerActivity"
             android:exported="false"
             android:screenOrientation="portrait" /> <!-- Splash Screen Activity -->
         <activity
-            android:name=".SplashActivity"
+            android:name="com.royals.mathshootergame.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.MathShooter.NoActionBar">
             <intent-filter>
@@ -52,23 +52,23 @@
             </intent-filter>
         </activity> <!-- Menu Activity -->
         <activity
-            android:name=".MenuActivity"
+            android:name="com.royals.mathshootergame.MenuActivity"
             android:exported="false"
             android:theme="@style/Theme.MathShooter" /> <!-- Main Game Activity -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.royals.mathshootergame.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="false"
             android:theme="@style/Theme.MathShooter.NoActionBar" /> <!-- Settings Activity -->
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.royals.mathshootergame.SettingsActivity"
             android:exported="false"
-            android:parentActivityName=".MenuActivity"
+            android:parentActivityName="com.royals.mathshootergame.MenuActivity"
             android:theme="@style/Theme.MathShooter" /> <!-- Leaderboard Activity -->
         <activity
-            android:name=".LeaderboardActivity"
+            android:name="com.royals.mathshootergame.LeaderboardActivity"
             android:exported="false"
-            android:parentActivityName=".MenuActivity"
+            android:parentActivityName="com.royals.mathshootergame.MenuActivity"
             android:theme="@style/Theme.MathShooter" />
     </application>
 

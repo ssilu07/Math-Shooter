@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.royals.mathshooter"
+    namespace = "com.royals.mathshootergame"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.royals.mathshooter"
+        applicationId = "com.royals.mathshootergame"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 5
-        versionName = "1.4"
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

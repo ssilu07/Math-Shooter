@@ -1,10 +1,8 @@
-package com.royals.mathshooter
+package com.royals.mathshootergame
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.*
-import android.os.Handler
-import android.os.Looper
 import android.os.Vibrator
 import kotlin.math.*
 import kotlin.random.Random

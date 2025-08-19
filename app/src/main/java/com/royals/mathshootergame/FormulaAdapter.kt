@@ -1,8 +1,7 @@
-package com.royals.mathshooter
+package com.royals.mathshootergame
 
 import android.graphics.Color
 import android.graphics.Typeface
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout

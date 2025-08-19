@@ -1,29 +1,21 @@
-package com.royals.mathshooter
+package com.royals.mathshootergame
 
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.AttributeSet
-import android.view.MotionEvent
 import android.view.SurfaceHolder
-import android.view.SurfaceView
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.random.Random
 
 // Data classes for game entities
 data class Enemy(

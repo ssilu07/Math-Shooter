@@ -1,4 +1,4 @@
-package com.royals.mathshooter
+package com.royals.mathshootergame
 
 import android.content.Intent
 import android.os.Bundle

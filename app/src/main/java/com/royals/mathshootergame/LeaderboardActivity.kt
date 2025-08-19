@@ -1,4 +1,4 @@
-package com.royals.mathshooter
+package com.royals.mathshootergame
 
 import android.content.SharedPreferences
 import android.graphics.Color

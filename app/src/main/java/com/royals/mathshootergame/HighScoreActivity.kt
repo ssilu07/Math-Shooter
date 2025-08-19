@@ -1,4 +1,4 @@
-package com.royals.mathshooter
+package com.royals.mathshootergame
 
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -9,8 +9,6 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import java.text.SimpleDateFormat
-import java.util.*
 
 class HighScoreActivity : AppCompatActivity() {
 
