@@ -17,6 +17,7 @@ import android.view.SurfaceView
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -33,7 +34,7 @@ data class Enemy(
     var speed: Float = 2f,
     var isAlive: Boolean = true,
     var isBoss: Boolean = false,
-    var id: Int = 0  // Add unique ID for each enemy
+    var id: Int = 0
 )
 
 data class Bullet(
@@ -59,8 +60,6 @@ enum class PowerUpType {
 enum class GameState {
     MENU, PLAYING, PAUSED, GAME_OVER, WAVE_COMPLETE, SETTINGS
 }
-
-// Updated MainActivity.kt - Solution Box System with Enhanced Error Handling
 
 class MainActivity : AppCompatActivity() {
     private lateinit var gameView: GameView
@@ -115,7 +114,7 @@ class MainActivity : AppCompatActivity() {
             gameView.setGameMode(gameMode)
             mainLayout.addView(gameView)
 
-            // Create new solution box controls
+            // Create new solution box controls (removed movement controls)
             createSolutionBoxControls(mainLayout)
 
             setContentView(mainLayout)
@@ -125,11 +124,9 @@ class MainActivity : AppCompatActivity() {
             gameView.setSolutionBoxesLayout(solutionBoxesLayout)
 
         } catch (e: Exception) {
-            // FIXED: Handle any initialization errors gracefully
             println("❌ Error initializing MainActivity: ${e.message}")
             e.printStackTrace()
 
-            // Show a simple error message and finish
             AlertDialog.Builder(this)
                 .setTitle("Error")
                 .setMessage("Failed to initialize game. Please restart the app.")
@@ -140,13 +137,11 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize sound manager
         soundManager = SoundManager(this)
-        // Pass sound manager to game view
         gameView.setSoundManager(soundManager)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Release sound resources
         if (::soundManager.isInitialized) {
             soundManager.release()
         }
@@ -160,8 +155,7 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
             setPadding(16, 16, 16, 8)
-            // FIXED: Use direct color instead of resource that might not exist
-            setBackgroundColor(Color.parseColor("#80000000")) // Semi-transparent black
+            setBackgroundColor(Color.parseColor("#80000000"))
         }
 
         // First row - Score and Lives
@@ -257,43 +251,27 @@ class MainActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            // FIXED: Use direct color instead of resource that might not exist
-            setBackgroundColor(Color.parseColor("#1A1A1A")) // Dark background
+            setBackgroundColor(Color.parseColor("#1A1A1A"))
             setPadding(12, 12, 12, 12)
         }
 
-        // Movement controls
-        val movementLayout = LinearLayout(this).apply {
+        // COMMENTED OUT: FIRE BUTTON - No longer needed
+        /*
+        val fireControlLayout = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
+            gravity = android.view.Gravity.CENTER
         }
 
-        val leftButton = createStyledButton("⬅️", Color.parseColor("#2196F3")).apply {
-            layoutParams = LinearLayout.LayoutParams(0, 100, 1f).apply {
-                setMargins(4, 4, 4, 4)
-            }
-            setOnTouchListener { _, event ->
-                try {
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            gameView.setMovement(-1)
-                            hapticFeedback()
-                        }
-                        MotionEvent.ACTION_UP -> gameView.setMovement(0)
-                    }
-                } catch (e: Exception) {
-                    println("❌ Error handling left button: ${e.message}")
-                }
-                true
-            }
-        }
-
-        val fireButton = createStyledButton("🔥 FIRE", Color.parseColor("#FF5722")).apply {
-            layoutParams = LinearLayout.LayoutParams(0, 100, 2f).apply {
-                setMargins(4, 4, 4, 4)
+        val fireButton = createStyledButton("🎯 FIRE TARGET", Color.parseColor("#FF5722")).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                120
+            ).apply {
+                setMargins(16, 8, 16, 8)
             }
             setOnClickListener {
                 try {
@@ -305,30 +283,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val rightButton = createStyledButton("➡️", Color.parseColor("#2196F3")).apply {
-            layoutParams = LinearLayout.LayoutParams(0, 100, 1f).apply {
-                setMargins(4, 4, 4, 4)
-            }
-            setOnTouchListener { _, event ->
-                try {
-                    when (event.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            gameView.setMovement(1)
-                            hapticFeedback()
-                        }
-                        MotionEvent.ACTION_UP -> gameView.setMovement(0)
-                    }
-                } catch (e: Exception) {
-                    println("❌ Error handling right button: ${e.message}")
-                }
-                true
-            }
-        }
-
-        movementLayout.addView(leftButton)
-        movementLayout.addView(fireButton)
-        movementLayout.addView(rightButton)
-        controlsLayout.addView(movementLayout)
+        fireControlLayout.addView(fireButton)
+        controlsLayout.addView(fireControlLayout)
+        */
 
         // Solution boxes layout
         createSolutionBoxes()
@@ -337,9 +294,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createSolutionBoxes() {
-        // Title for solution section
+        // Enhanced title for solution section
         val solutionTitle = TextView(this).apply {
-            text = "Select Answer:"
+            text = "🎯 SELECT ANSWER TO AUTO-FIRE:"
             textSize = 18f
             setTextColor(Color.WHITE)
             typeface = Typeface.DEFAULT_BOLD
@@ -364,60 +321,67 @@ class MainActivity : AppCompatActivity() {
             setPadding(8, 8, 8, 8)
         }
 
-        // Initially show waiting message instead of placeholder zeros
-        updateSolutionBoxes(listOf()) // Empty list = waiting state
+        // Initially show waiting message
+        updateSolutionBoxes(listOf())
 
         controlsLayout.addView(solutionBoxesLayout)
     }
 
     fun updateSolutionBoxes(answers: List<Int>) {
         try {
-            // Clear existing boxes
             solutionBoxesLayout.removeAllViews()
 
             if (answers.isEmpty()) {
-                // Show "waiting for enemies" state instead of zeros
-                val waitingMessage = TextView(this).apply {
-                    text = "Waiting for enemies..."
-                    textSize = 18f
-                    setTextColor(Color.GRAY)
-                    typeface = Typeface.DEFAULT_BOLD
-                    gravity = android.view.Gravity.CENTER
+                // Enhanced waiting state
+                val waitingLayout = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
                         120
-                    ).apply {
-                        setMargins(16, 16, 16, 16)
-                    }
+                    )
+                    gravity = android.view.Gravity.CENTER
                 }
-                solutionBoxesLayout.addView(waitingMessage)
+
+                val waitingIcon = TextView(this).apply {
+                    text = "🎯"
+                    textSize = 32f
+                    gravity = android.view.Gravity.CENTER
+                }
+
+                val waitingMessage = TextView(this).apply {
+                    text = "Scanning for targets..."
+                    textSize = 16f
+                    setTextColor(Color.GRAY)
+                    typeface = Typeface.DEFAULT_BOLD
+                    gravity = android.view.Gravity.CENTER
+                }
+
+                waitingLayout.addView(waitingIcon)
+                waitingLayout.addView(waitingMessage)
+                solutionBoxesLayout.addView(waitingLayout)
                 return
             }
 
-            // Create new solution boxes only when we have valid answers
+            // Create enhanced solution boxes
             answers.forEachIndexed { index, answer ->
                 val solutionBox = Button(this).apply {
                     text = answer.toString()
-                    textSize = 24f
+                    textSize = 28f  // Larger text
                     setTextColor(Color.WHITE)
                     typeface = Typeface.DEFAULT_BOLD
 
-                    // Create modern button background
-                    background = createSolutionBoxBackground(false)
+                    background = createEnhancedSolutionBoxBackground(false)
 
                     layoutParams = LinearLayout.LayoutParams(
                         0,
-                        120,
+                        140,  // Taller buttons
                         1f
                     ).apply {
                         setMargins(8, 8, 8, 8)
                     }
 
-                    // Remove default button padding
                     setPadding(0, 0, 0, 0)
                     stateListAnimator = null
-
-                    // Center the text
                     gravity = android.view.Gravity.CENTER
 
                     setOnClickListener {
@@ -425,6 +389,9 @@ class MainActivity : AppCompatActivity() {
                             hapticFeedback()
                             gameView.selectSolutionBox(index, answer)
                             updateSolutionBoxSelection(index)
+
+                            // Show selection feedback
+                            showSelectionFeedback(answer)
                         } catch (e: Exception) {
                             println("❌ Error selecting solution box: ${e.message}")
                         }
@@ -438,15 +405,88 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun createEnhancedSolutionBoxBackground(isSelected: Boolean): android.graphics.drawable.Drawable {
+        val strokeWidth = 6  // Thicker border
+        val cornerRadius = 20f  // More rounded
+
+        val gradientDrawable = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            setCornerRadius(cornerRadius)
+
+            if (isSelected) {
+                // Selected state - bright glowing effect
+                setColor(Color.parseColor("#1B5E20"))  // Dark green background
+                setStroke(strokeWidth, Color.parseColor("#4CAF50"))  // Bright green border
+            } else {
+                // Normal state - blue theme
+                setColor(Color.parseColor("#0D47A1"))  // Dark blue background
+                setStroke(strokeWidth, Color.parseColor("#2196F3"))  // Blue border
+            }
+        }
+
+        val pressedDrawable = android.graphics.drawable.GradientDrawable().apply {
+            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+            setCornerRadius(cornerRadius)
+            setColor(Color.parseColor("#263238"))  // Dark gray when pressed
+            setStroke(strokeWidth, Color.parseColor("#FF9800"))  // Orange border when pressed
+        }
+
+        val stateListDrawable = android.graphics.drawable.StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
+            addState(intArrayOf(), gradientDrawable)
+        }
+
+        return stateListDrawable
+    }
+
+    private fun showSelectionFeedback(answer: Int) {
+        // Brief visual feedback when answer is selected
+        val feedbackText = TextView(this).apply {
+            text = "Selected: $answer ✓"
+            textSize = 20f
+            setTextColor(Color.GREEN)
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = android.view.Gravity.CENTER
+            alpha = 0f
+        }
+
+        // Add to layout temporarily
+        controlsLayout.addView(feedbackText)
+
+        // Animate in and out
+        feedbackText.animate()
+            .alpha(1f)
+            .setDuration(200)
+            .withEndAction {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    feedbackText.animate()
+                        .alpha(0f)
+                        .setDuration(300)
+                        .withEndAction {
+                            controlsLayout.removeView(feedbackText)
+                        }
+                }, 800)
+            }
+    }
+
     fun updateSolutionBoxSelection(selectedIndex: Int) {
         try {
-            // Only update if we have actual solution boxes (not the waiting message)
             if (solutionBoxesLayout.childCount > 0 && solutionBoxesLayout.getChildAt(0) is Button) {
-                // Update visual state of all solution boxes
                 for (i in 0 until solutionBoxesLayout.childCount) {
                     val child = solutionBoxesLayout.getChildAt(i)
                     if (child is Button) {
-                        child.background = createSolutionBoxBackground(i == selectedIndex)
+                        child.background = createEnhancedSolutionBoxBackground(i == selectedIndex)
+
+                        // Add glow effect to selected button
+                        if (i == selectedIndex) {
+                            child.elevation = 12f
+                            child.scaleX = 1.05f
+                            child.scaleY = 1.05f
+                        } else {
+                            child.elevation = 4f
+                            child.scaleX = 1f
+                            child.scaleY = 1f
+                        }
                     }
                 }
             }
@@ -455,40 +495,27 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun createSolutionBoxBackground(isSelected: Boolean): android.graphics.drawable.Drawable {
-        val strokeWidth = 4
-        val cornerRadius = 16f
+    // New method to highlight solution boxes when player tries to fire without selection
+    fun highlightSolutionBoxes() {
+        try {
+            for (i in 0 until solutionBoxesLayout.childCount) {
+                val child = solutionBoxesLayout.getChildAt(i)
+                if (child is Button) {
+                    // Flash red briefly
+                    val originalBackground = child.background
+                    child.setBackgroundColor(Color.RED)
 
-        val gradientDrawable = android.graphics.drawable.GradientDrawable().apply {
-            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-            setCornerRadius(cornerRadius)
-
-            if (isSelected) {
-                // Selected state - bright colors
-                setColor(Color.parseColor("#2A2A2A"))
-                setStroke(strokeWidth, Color.parseColor("#00E676"))
-            } else {
-                // Normal state - dark with cyan border
-                setColor(Color.parseColor("#1A1A1A"))
-                setStroke(strokeWidth, Color.parseColor("#00BCD4"))
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        child.background = originalBackground
+                    }, 200)
+                }
             }
-        }
 
-        // Create pressed state drawable
-        val pressedDrawable = android.graphics.drawable.GradientDrawable().apply {
-            shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-            setCornerRadius(cornerRadius)
-            setColor(Color.parseColor("#3A3A3A"))
-            setStroke(strokeWidth, Color.parseColor("#26C6DA"))
+            // Show toast message
+            Toast.makeText(this, "⚠️ Select an answer first!", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            println("❌ Error highlighting solution boxes: ${e.message}")
         }
-
-        // Create state list drawable for press effects
-        val stateListDrawable = android.graphics.drawable.StateListDrawable().apply {
-            addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
-            addState(intArrayOf(), gradientDrawable)
-        }
-
-        return stateListDrawable
     }
 
     private fun createStyledButton(text: String, backgroundColor: Int): Button {
@@ -513,7 +540,6 @@ class MainActivity : AppCompatActivity() {
                 vibrator.vibrate(50)
             }
         } catch (e: Exception) {
-            // FIXED: Haptic feedback not available - don't crash
             println("❌ Haptic feedback not available: ${e.message}")
         }
     }
@@ -545,20 +571,16 @@ class MainActivity : AppCompatActivity() {
             if (::gameView.isInitialized) {
                 when (gameView.gameState) {
                     GameState.PLAYING -> {
-                        // First back press pauses the game
                         gameView.pauseGame()
                         showPauseDialog()
                     }
                     GameState.PAUSED -> {
-                        // If already paused, show pause options
                         showPauseDialog()
                     }
                     GameState.GAME_OVER -> {
-                        // If game over, show exit dialog
                         showExitDialog()
                     }
                     else -> {
-                        // For any other state, show exit dialog
                         showExitDialog()
                     }
                 }
@@ -577,26 +599,22 @@ class MainActivity : AppCompatActivity() {
                 .setTitle("Exit Game?")
                 .setMessage("Do you want to return to the main menu?\n\nYour progress will be lost.")
                 .setPositiveButton("YES") { _, _ ->
-                    // Return to main menu
                     finish()
                 }
                 .setNegativeButton("NO") { dialog, _ ->
-                    // Stay in game and resume if it was paused
                     dialog.dismiss()
                     try {
                         if (::gameView.isInitialized && gameView.gameState == GameState.PAUSED) {
-                            gameView.pauseGame() // This will resume the game
+                            gameView.pauseGame()
                         }
                     } catch (e: Exception) {
                         println("❌ Error resuming game: ${e.message}")
                     }
                 }
-                .setCancelable(false) // Prevent dismissing by tapping outside
+                .setCancelable(false)
                 .create()
 
-            // Style the dialog to make title and message visible
             dialog.setOnShowListener {
-                // Style title
                 val titleId = resources.getIdentifier("alertTitle", "id", "android")
                 if (titleId > 0) {
                     dialog.findViewById<TextView>(titleId)?.apply {
@@ -607,7 +625,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                // Style message
                 val messageId = android.R.id.message
                 dialog.findViewById<TextView>(messageId)?.apply {
                     setTextColor(Color.DKGRAY)
@@ -616,14 +633,13 @@ class MainActivity : AppCompatActivity() {
                     setPadding(20, 20, 20, 40)
                 }
 
-                // Style buttons
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
-                    setTextColor(Color.parseColor("#FF5722")) // Red color for YES
+                    setTextColor(Color.parseColor("#FF5722"))
                     textSize = 16f
                     typeface = Typeface.DEFAULT_BOLD
                 }
                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.apply {
-                    setTextColor(Color.parseColor("#4CAF50")) // Green color for NO
+                    setTextColor(Color.parseColor("#4CAF50"))
                     textSize = 16f
                     typeface = Typeface.DEFAULT_BOLD
                 }
@@ -632,7 +648,6 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         } catch (e: Exception) {
             println("❌ Error showing exit dialog: ${e.message}")
-            // Fallback: just exit the activity
             finish()
         }
     }
@@ -642,8 +657,6 @@ class MainActivity : AppCompatActivity() {
             val dialog = AlertDialog.Builder(this)
                 .setTitle("Game Paused")
                 .setMessage("What would you like to do?")
-                // Remove this line to eliminate the duplicate icon:
-                // .setIcon(android.R.drawable.ic_media_pause)
                 .setPositiveButton("RESUME") { dialog, _ ->
                     dialog.dismiss()
                     try {
@@ -671,7 +684,6 @@ class MainActivity : AppCompatActivity() {
                 .create()
 
             dialog.setOnShowListener {
-                // Style title
                 val titleId = resources.getIdentifier("alertTitle", "id", "android")
                 if (titleId > 0) {
                     dialog.findViewById<TextView>(titleId)?.apply {
@@ -682,7 +694,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                // Style message
                 val messageId = android.R.id.message
                 dialog.findViewById<TextView>(messageId)?.apply {
                     setTextColor(Color.GRAY)
@@ -691,7 +702,6 @@ class MainActivity : AppCompatActivity() {
                     setPadding(20, 20, 20, 40)
                 }
 
-                // Style buttons
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.apply {
                     setTextColor(Color.parseColor("#4CAF50"))
                     textSize = 16f
@@ -714,7 +724,6 @@ class MainActivity : AppCompatActivity() {
             println("❌ Error showing pause dialog: ${e.message}")
         }
     }
-
 }
 
 class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView: GameView) : Thread() {
@@ -742,7 +751,6 @@ class GameThread(private val surfaceHolder: SurfaceHolder, private val gameView:
                     gameView.draw(canvas)
                 }
             } catch (e: Exception) {
-                // FIXED: Better error handling for game thread
                 println("❌ Error in game thread: ${e.message}")
                 e.printStackTrace()
             } finally {

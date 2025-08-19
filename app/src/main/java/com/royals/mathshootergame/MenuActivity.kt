@@ -115,8 +115,8 @@ class MenuActivity : AppCompatActivity() {
         mainLayout.addView(highScoreText)
         mainLayout.addView(playButton)
         mainLayout.addView(practiceButton)
-        mainLayout.addView(learnButton)  // ADD THE NEW LEARN BUTTON
-        mainLayout.addView(mathLearnerButton)
+       // mainLayout.addView(learnButton)  // ADD THE NEW LEARN BUTTON
+      //  mainLayout.addView(mathLearnerButton)
         mainLayout.addView(dailyChallengeButton)
         mainLayout.addView(leaderboardButton)
         mainLayout.addView(settingsButton)
